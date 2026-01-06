@@ -156,18 +156,21 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
           
           // Both hands raised above head
           if (leftWrist.y < nose!.y && rightWrist.y < nose!.y) {
+             console.log("Gesture Detected: Hands Raised Up - Shifting T-shirt up");
              setVerticalOffset(prev => Math.max(prev - 0.05, -0.3));
              gestureCooldown.current = true;
              setTimeout(() => gestureCooldown.current = false, 1000);
           }
           // Both arms extended wide
-          else if (armSpan > shoulderWidth * 2.5) {
+          else if (armSpan > shoulderWidth * 2.0) { // Reduced threshold from 2.5 to 2.0 for easier detection
+            console.log("Gesture Detected: Arms Extended Wide - Increasing T-shirt size");
             setSizeScale(prev => Math.min(prev + 0.1, 2.0));
             gestureCooldown.current = true;
             setTimeout(() => gestureCooldown.current = false, 1000);
           }
-          // Hands crossed (wrists close together and past shoulders)
-          else if (Math.abs(leftWrist.x - rightWrist.x) < shoulderWidth * 0.3) {
+          // Hands crossed (wrists close together)
+          else if (Math.abs(leftWrist.x - rightWrist.x) < shoulderWidth * 0.5) { // Increased threshold from 0.3 to 0.5 for easier detection
+            console.log("Gesture Detected: Hands Crossed - Decreasing T-shirt size");
             setSizeScale(prev => Math.max(prev - 0.1, 0.5));
             gestureCooldown.current = true;
             setTimeout(() => gestureCooldown.current = false, 1000);
