@@ -1,13 +1,25 @@
-import { type Request, Response } from "express";
+import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
+import { setupVite } from "./vite";
 import { createServer } from "http";
-import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
+import fs from "fs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Internal log implementation since it's not exported from vite.ts
+export function log(message: string, source = "express") {
+  const formattedTime = new Date().toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  });
+
+  console.log(`${formattedTime} [${source}] ${message}`);
+}
 
 const app = express();
 app.use(express.json());
@@ -43,9 +55,11 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  const server = registerRoutes(app);
+  const server = createServer(app);
+  // registerRoutes might be async or return something, following original pattern
+  await registerRoutes(server, app);
 
-  app.use((err: any, _req: Request, res: Response, _next: any) => {
+  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
 
@@ -53,14 +67,21 @@ app.use((req, res, next) => {
     throw err;
   });
 
-  if (app.get("env") === "development") {
-    await setupVite(app, server);
+  if (process.env.NODE_ENV !== "production") {
+    await setupVite(server, app);
   } else {
-    serveStatic(app);
+    // Basic static serving if serveStatic is unavailable
+    const distPath = path.resolve(__dirname, "..", "dist", "public");
+    if (fs.existsSync(distPath)) {
+      app.use(express.static(distPath));
+      app.use("*", (_req, res) => {
+        res.sendFile(path.resolve(distPath, "index.html"));
+      });
+    }
   }
 
-  const PORT = 5000;
-  server.listen(PORT, "0.0.0.0", () => {
-    log(`serving on port ${PORT}`);
+  const port = 5000;
+  server.listen(port, "0.0.0.0", () => {
+    log(`serving on port ${port}`);
   });
 })();
