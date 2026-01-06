@@ -56,7 +56,7 @@ export default function About() {
         >
           <motion.h1 variants={fadeInUp} className="text-5xl md:text-7xl font-display font-bold text-white mb-8">
             The Future of <br/>
-            <span className="text-primary">Fashion Identity</span>
+            <span className="text-primary">Digital Identity</span>
           </motion.h1>
           <motion.p variants={fadeInUp} className="text-xl text-neutral-400 leading-relaxed mb-8">
             ONYU is not just a brand; it's a digital-first fashion ecosystem. We bridge the gap between high-end apparel and cutting-edge technology to create a seamless, personalized experience for the modern individual.

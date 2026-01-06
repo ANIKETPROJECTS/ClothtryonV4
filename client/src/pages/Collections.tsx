@@ -2,6 +2,9 @@ import { motion } from "framer-motion";
 import { Navigation } from "@/components/Navigation";
 import { Link } from "wouter";
 import editorialImg from "@assets/generated_images/high-end_fashion_editorial_dark_aesthetic.png";
+import monochromeImg from "@assets/generated_images/monochrome_fashion_photography_dark_black_grey.png";
+import essentialImg from "@assets/generated_images/minimalist_white_premium_t-shirt_editorial.png";
+import techImg from "@assets/generated_images/technical_apparel_detail_dark_aesthetic.png";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -15,21 +18,21 @@ const collections = [
     title: "The Essential Series",
     subtitle: "Foundation of Modern Style",
     desc: "A curation of timeless silhouettes crafted from 240GSM premium cotton. Designed for those who value structure and breathability in their daily rotation.",
-    image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?q=80&w=2574&auto=format&fit=crop"
+    image: essentialImg
   },
   {
     id: "tech",
     title: "Technical Refinement",
     subtitle: "Utility Meets Luxury",
     desc: "Merging water-resistant technical fabrics with architectural draping. This collection explores the intersection of performance and high-end aesthetics.",
-    image: "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?q=80&w=2670&auto=format&fit=crop"
+    image: techImg
   },
   {
     id: "monochrome",
     title: "Monochrome Studio",
     subtitle: "The Power of One",
     desc: "An exploration of depth and texture through a singular palette. Deep blacks, charcoal greys, and stark whites defined by premium French Terry.",
-    image: "https://images.unsplash.com/photo-1441984908796-90f221637567?q=80&w=2670&auto=format&fit=crop"
+    image: monochromeImg
   }
 ];
 
