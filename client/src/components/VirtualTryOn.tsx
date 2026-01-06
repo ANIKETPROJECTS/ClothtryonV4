@@ -59,6 +59,11 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
     preloadImages();
   }, []);
 
+  const [sizeScale, setSizeScale] = useState(1);
+  const [verticalOffset, setVerticalOffset] = useState(0);
+  const gestureCooldown = useRef(false);
+  const lastPose = useRef<Pose | null>(null);
+
   const detect = useCallback(async () => {
     if (
       webcamRef.current?.video?.readyState === 4 &&
@@ -80,19 +85,26 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
       const fps = 1000 / (end - start);
 
       if (poses && poses.length > 0) {
-        const pose = poses[0];
+        lastPose.current = poses[0];
         setMetrics({ 
           fps: Math.round(fps), 
-          confidence: Math.round((pose.score || 0) * 100) 
+          confidence: Math.round((lastPose.current.score || 0) * 100) 
         });
-        drawCanvas(pose, videoWidth, videoHeight, canvasRef.current);
+        drawCanvas(lastPose.current, videoWidth, videoHeight, canvasRef.current);
       } else {
         const ctx = canvasRef.current.getContext("2d");
         if (ctx) ctx.clearRect(0, 0, videoWidth, videoHeight);
         setMetrics(prev => ({ ...prev, fps: Math.round(fps), confidence: 0 }));
       }
     }
-  }, [model, currentView]);
+  }, [model, currentView, sizeScale, verticalOffset]);
+
+  useEffect(() => {
+    // Force redraw when scale or offset changes even if no new pose estimate is being made
+    if (lastPose.current && canvasRef.current && webcamRef.current?.video) {
+      drawCanvas(lastPose.current, canvasRef.current.width, canvasRef.current.height, canvasRef.current);
+    }
+  }, [sizeScale, verticalOffset]);
 
   useEffect(() => {
     let animationFrameId: number;
@@ -113,10 +125,6 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
       cancelAnimationFrame(animationFrameId);
     };
   }, [detect, isLoading, model]);
-
-  const [sizeScale, setSizeScale] = useState(1);
-  const [verticalOffset, setVerticalOffset] = useState(0);
-  const gestureCooldown = useRef(false);
 
   const drawCanvas = (pose: Pose, width: number, height: number, canvas: HTMLCanvasElement | null) => {
     if (!canvas) return;
@@ -155,7 +163,7 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
 
           if (leftWristRaised && rightWristRaised) {
             setVerticalOffset(prev => {
-              const next = Math.max(prev - 0.1, -0.5);
+              const next = Math.max(prev - 0.05, -0.5);
               console.log(`Gesture: Both wrists raised - Shifting T-shirt up. New Offset: ${next.toFixed(2)}`);
               return next;
             });
@@ -163,7 +171,7 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
             setTimeout(() => gestureCooldown.current = false, 150);
           } else if (rightWristRaised) {
             setSizeScale(prev => {
-              const next = Math.min(prev + 0.3, 3.0);
+              const next = Math.min(prev + 0.1, 3.0);
               console.log(`Gesture: Right wrist raised - Increasing T-shirt size. New Scale: ${next.toFixed(2)}`);
               return next;
             });
@@ -171,7 +179,7 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
             setTimeout(() => gestureCooldown.current = false, 150);
           } else if (leftWristRaised) {
             setSizeScale(prev => {
-              const next = Math.max(prev - 0.3, 0.4);
+              const next = Math.max(prev - 0.1, 0.4);
               console.log(`Gesture: Left wrist raised - Decreasing T-shirt size. New Scale: ${next.toFixed(2)}`);
               return next;
             });
