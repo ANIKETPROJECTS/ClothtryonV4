@@ -282,13 +282,25 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
     hands.forEach(hand => {
       const hp = hand.keypoints;
       
-      // Draw joints
-      hp.forEach(kp => {
+      // Draw finger tip markers (Indices: 4, 8, 12, 16, 20)
+      const fingerTips = [4, 8, 12, 16, 20];
+      
+      hp.forEach((kp, index) => {
         if (kp.score! > 0.3) {
           ctx.beginPath();
-          ctx.arc(kp.x, kp.y, 3, 0, 2 * Math.PI);
-          ctx.fillStyle = "#00FF00";
+          // Larger marker for finger tips, smaller for joints
+          const isTip = fingerTips.includes(index);
+          const radius = isTip ? 6 : 2;
+          
+          ctx.arc(kp.x, kp.y, radius, 0, 2 * Math.PI);
+          ctx.fillStyle = isTip ? "#00FF00" : "rgba(0, 255, 0, 0.5)";
           ctx.fill();
+          
+          if (isTip) {
+            ctx.strokeStyle = "white";
+            ctx.lineWidth = 1;
+            ctx.stroke();
+          }
         }
       });
 
@@ -302,14 +314,20 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
         [0, 5, 9, 13, 17, 0] // palm
       ];
 
+      ctx.strokeStyle = "#00FF00";
+      ctx.lineWidth = 2;
       connections.forEach(path => {
         ctx.beginPath();
-        for (let i = 0; i < path.length - 1; i++) {
-          const p1 = hp[path[i]];
-          const p2 = hp[path[i+1]];
-          if (p1.score! > 0.3 && p2.score! > 0.3) {
-            if (i === 0) ctx.moveTo(p1.x, p1.y);
-            ctx.lineTo(p2.x, p2.y);
+        let started = false;
+        for (let i = 0; i < path.length; i++) {
+          const p = hp[path[i]];
+          if (p.score! > 0.3) {
+            if (!started) {
+              ctx.moveTo(p.x, p.y);
+              started = true;
+            } else {
+              ctx.lineTo(p.x, p.y);
+            }
           }
         }
         ctx.stroke();
