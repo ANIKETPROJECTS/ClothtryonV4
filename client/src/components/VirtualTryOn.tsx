@@ -3,7 +3,6 @@ import Webcam from "react-webcam";
 import * as tf from "@tensorflow/tfjs-core";
 import "@tensorflow/tfjs-backend-webgl";
 import * as poseDetection from "@tensorflow-models/pose-detection";
-import * as handPoseDetection from "@tensorflow-models/hand-pose-detection";
 import { motion, AnimatePresence } from "framer-motion";
 import { Camera, X, RefreshCw, AlertCircle } from "lucide-react";
 import { TSHIRT_CONFIG } from "@/lib/tshirt-config";
@@ -15,14 +14,12 @@ interface VirtualTryOnProps {
 
 type Pose = poseDetection.Pose;
 type Keypoint = poseDetection.Keypoint;
-type Hand = handPoseDetection.Hand;
 
 export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [model, setModel] = useState<poseDetection.PoseDetector | null>(null);
-  const [handModel, setHandModel] = useState<handPoseDetection.HandDetector | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [metrics, setMetrics] = useState({ fps: 0, confidence: 0 });
   const [currentView, setCurrentView] = useState<'front' | 'back' | 'left' | 'right'>('front');
@@ -30,11 +27,9 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
   const shirtImages = useRef<{ [key: string]: HTMLImageElement }>({});
 
   useEffect(() => {
-    const loadModels = async () => {
+    const loadModel = async () => {
       try {
         await tf.ready();
-        
-        // Reverting to MoveNet as it was stable for body tracking
         const detectorConfig: poseDetection.MoveNetModelConfig = {
           modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING,
           enableSmoothing: true
@@ -43,22 +38,10 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
           poseDetection.SupportedModels.MoveNet,
           detectorConfig
         );
-        
-        // Hand Detector with tfjs runtime for better stability in this environment
-        const handDetector = await handPoseDetection.createDetector(
-          handPoseDetection.SupportedModels.MediaPipeHands,
-          {
-            runtime: "tfjs",
-            modelType: "full",
-            maxHands: 2
-          }
-        );
-
         setModel(detector);
-        setHandModel(handDetector);
         setIsLoading(false);
       } catch (err) {
-        console.error("Failed to load models:", err);
+        console.error("Failed to load pose model:", err);
         setError("Failed to initialize VTO engine. Please try again.");
         setIsLoading(false);
       }
@@ -72,7 +55,7 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
       });
     };
 
-    loadModels();
+    loadModel();
     preloadImages();
   }, []);
 
@@ -92,30 +75,7 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
       }
 
       const start = performance.now();
-      
-      // Get Pose
       const poses = await model.estimatePoses(video, { flipHorizontal: false });
-      
-      // Get Hand Landmarks from Python Service
-      let handsData: any[] = [];
-      try {
-        const screenshot = webcamRef.current.getScreenshot();
-        if (screenshot) {
-          const response = await fetch('http://localhost:5001/detect', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ image: screenshot })
-          });
-          const result = await response.json();
-          handsData = result.hands || [];
-          if (handsData.length > 0) {
-            console.log(`[Python Hand Detection] Detected ${handsData.length} hand(s)`);
-          }
-        }
-      } catch (err) {
-        // Silently fail hand detection if service is not ready
-      }
-      
       const end = performance.now();
       const fps = 1000 / (end - start);
 
@@ -125,19 +85,7 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
           fps: Math.round(fps), 
           confidence: Math.round((pose.score || 0) * 100) 
         });
-        
-        // Convert Python hand data format to what drawCanvas expects
-        const formattedHands: Hand[] = handsData.map(hand => ({
-          keypoints: hand.map((lm: any) => ({
-            x: lm.x * videoWidth,
-            y: lm.y * videoHeight,
-            score: 1.0 
-          })),
-          score: 1.0,
-          handedness: 'Right'
-        }));
-        
-        drawCanvas(pose, formattedHands, videoWidth, videoHeight, canvasRef.current);
+        drawCanvas(pose, videoWidth, videoHeight, canvasRef.current);
       } else {
         const ctx = canvasRef.current.getContext("2d");
         if (ctx) ctx.clearRect(0, 0, videoWidth, videoHeight);
@@ -156,7 +104,7 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
       animationFrameId = requestAnimationFrame(loop);
     };
 
-    if (!isLoading && model && handModel) {
+    if (!isLoading && model) {
       loop();
     }
 
@@ -164,9 +112,9 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
       isRunning = false;
       cancelAnimationFrame(animationFrameId);
     };
-  }, [detect, isLoading, model, handModel]);
+  }, [detect, isLoading, model]);
 
-  const drawCanvas = (pose: Pose, hands: Hand[], width: number, height: number, canvas: HTMLCanvasElement | null) => {
+  const drawCanvas = (pose: Pose, width: number, height: number, canvas: HTMLCanvasElement | null) => {
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
@@ -203,12 +151,14 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
         
         if (hasNose) {
           const noseOffset = (nose.x - shoulderCenterX) / (shoulderWidth / 2);
+          // Swapped 'left' and 'right' logic to fix the mirrored image issue
           if (noseOffset > 0.6) detectedView = 'left';
           else if (noseOffset < -0.6) detectedView = 'right';
           else detectedView = 'front';
         } else if (facePointsCount >= 1) {
           detectedView = 'front';
         } else if (earPointsCount === 1) {
+          // Swapped 'left' and 'right' logic here too
           detectedView = leftEar?.score! > rightEar?.score! ? 'right' : 'left';
         } else {
           detectedView = 'front';
@@ -221,8 +171,8 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
         setCurrentView(detectedView);
       }
 
-      // Draw tracking lines for body and hands
-      drawTrackingOverlay(ctx, keypoints, hands);
+      // Draw tracking lines for body only
+      drawTrackingOverlay(ctx, keypoints);
 
       // Select Image
       const shirtImg = shirtImages.current[currentView];
@@ -232,20 +182,30 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
         const hipCenterX = (leftHip.x + rightHip.x) / 2;
         const hipCenterY = (leftHip.y + rightHip.y) / 2;
 
+        // Calculate a stable shoulder width to prevent shrinking in profile/side views
         const shoulderWidth = Math.abs(rightShoulder.x - leftShoulder.x);
         const torsoHeight = Math.abs(hipCenterY - shoulderCenterY);
 
+        // Maintain a minimum width based on the video width to prevent "shrinking" when turning
         const minShoulderWidth = width * 0.4;
         const stableWidth = Math.max(shoulderWidth, minShoulderWidth);
 
+        // Use a uniform scale to prevent stretching and keep the T-shirt "normal"
+        // Reducing scale factor slightly to make the T-shirt just a little smaller
         const scale = (stableWidth * 1.35) / shirtImg.width;
+
+        // Set angle to 0 for a fixed, straight T-shirt
         const angle = 0;
 
         ctx.save();
+        // Anchor to shoulder center
         ctx.translate(shoulderCenterX, shoulderCenterY);
         ctx.rotate(angle);
+        
         ctx.scale(scale, scale);
 
+        // Position adjustment: Shift T-shirt upwards
+        // Moving from -0.18 to -0.15 to lower it slightly as requested
         ctx.drawImage(
           shirtImg, 
           -shirtImg.width / 2, 
@@ -258,6 +218,8 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
         if (currentView === 'left' || currentView === 'right') {
           const drawArmSegment = (p1?: Keypoint, p2?: Keypoint) => {
             if (p1 && p1.score! > minConfidence && p2 && p2.score! > minConfidence) {
+              // We only want elbow to wrist/ahead
+              // But to look natural we draw the whole segment
               ctx.beginPath();
               ctx.strokeStyle = "#00FF00";
               ctx.lineWidth = 4;
@@ -273,8 +235,10 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
           const rightWrist = keypoints.find(k => k.name === "right_wrist");
 
           if (currentView === 'left') {
+            // In left view (facing left), the right arm is usually more visible/ahead
             drawArmSegment(rightElbow, rightWrist);
           } else {
+            // In right view, the left arm is ahead
             drawArmSegment(leftElbow, leftWrist);
           }
         }
@@ -282,10 +246,11 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
     }
   };
 
-  const drawTrackingOverlay = (ctx: CanvasRenderingContext2D, keypoints: Keypoint[], hands: Hand[]) => {
+  const drawTrackingOverlay = (ctx: CanvasRenderingContext2D, keypoints: Keypoint[]) => {
     const points = ["left_shoulder", "right_shoulder", "left_hip", "right_hip", "left_elbow", "right_elbow", "left_wrist", "right_wrist"];
     const found = points.map(name => keypoints.find(k => k.name === name));
     
+    // Bright Green (#00FF00) for maximum visibility as requested
     ctx.strokeStyle = "#00FF00";
     ctx.lineWidth = 4;
     ctx.lineCap = "round";
@@ -301,67 +266,12 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
       }
     };
 
-    drawLine(ls, rs);
-    drawLine(ls, lh);
-    drawLine(rs, rh);
-    drawLine(lh, rh);
-    drawLine(ls, le); drawLine(le, lw);
-    drawLine(rs, re); drawLine(re, rw);
-
-    // Draw Hands
-    hands.forEach(hand => {
-      const hp = hand.keypoints;
-      const fingerTips = [4, 8, 12, 16, 20];
-      
-      // Draw all hand keypoints
-      hp.forEach((kp, index) => {
-        // Lowered threshold even further to ensure we catch anything the model finds
-        if (kp.score! > 0.05) { 
-          ctx.beginPath();
-          const isTip = fingerTips.includes(index);
-          const radius = isTip ? 10 : 4; // Larger markers
-          
-          ctx.arc(kp.x, kp.y, radius, 0, 2 * Math.PI);
-          ctx.fillStyle = isTip ? "#00FF00" : "rgba(0, 255, 0, 0.4)";
-          ctx.fill();
-          
-          if (isTip) {
-            ctx.strokeStyle = "white";
-            ctx.lineWidth = 3;
-            ctx.stroke();
-          }
-        }
-      });
-
-      // Hand Skeleton
-      const connections = [
-        [0, 1, 2, 3, 4], // thumb
-        [0, 5, 6, 7, 8], // index
-        [0, 9, 10, 11, 12], // middle
-        [0, 13, 14, 15, 16], // ring
-        [0, 17, 18, 19, 20], // pinky
-        [0, 5, 9, 13, 17, 0] // palm
-      ];
-
-      ctx.strokeStyle = "#00FF00";
-      ctx.lineWidth = 3;
-      connections.forEach(path => {
-        ctx.beginPath();
-        let started = false;
-        path.forEach(idx => {
-          const p = hp[idx];
-          if (p.score! > 0.1) {
-            if (!started) {
-              ctx.moveTo(p.x, p.y);
-              started = true;
-            } else {
-              ctx.lineTo(p.x, p.y);
-            }
-          }
-        });
-        ctx.stroke();
-      });
-    });
+    drawLine(ls, rs); // shoulders
+    drawLine(ls, lh); // left torso
+    drawLine(rs, rh); // right torso
+    drawLine(lh, rh); // hips
+    drawLine(ls, le); drawLine(le, lw); // left arm
+    drawLine(rs, re); drawLine(re, rw); // right arm
   };
 
   const capturePhoto = () => {
