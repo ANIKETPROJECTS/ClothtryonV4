@@ -44,11 +44,12 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
           detectorConfig
         );
         
-        // Load Hand Detector
+        // Load Hand Detector with MediaPipe runtime for significantly better accuracy and speed
         const handDetector = await handPoseDetection.createDetector(
           handPoseDetection.SupportedModels.MediaPipeHands,
           {
-            runtime: "tfjs",
+            runtime: "mediapipe",
+            solutionPath: "https://cdn.jsdelivr.net/npm/@mediapipe/hands",
             modelType: "full",
             maxHands: 2
           }
@@ -278,50 +279,47 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
     drawLine(rs, re); drawLine(re, rw);
 
     // Draw Hands
-    ctx.lineWidth = 2;
     hands.forEach(hand => {
       const hp = hand.keypoints;
-      
-      // Draw finger tip markers (Indices: 4, 8, 12, 16, 20)
       const fingerTips = [4, 8, 12, 16, 20];
       
+      // Draw all hand keypoints
       hp.forEach((kp, index) => {
-        if (kp.score! > 0.3) {
+        if (kp.score! > 0.1) { // Lowered confidence threshold for hands
           ctx.beginPath();
-          // Larger marker for finger tips, smaller for joints
           const isTip = fingerTips.includes(index);
-          const radius = isTip ? 6 : 2;
+          const radius = isTip ? 8 : 3;
           
           ctx.arc(kp.x, kp.y, radius, 0, 2 * Math.PI);
-          ctx.fillStyle = isTip ? "#00FF00" : "rgba(0, 255, 0, 0.5)";
+          ctx.fillStyle = isTip ? "#00FF00" : "rgba(0, 255, 0, 0.6)";
           ctx.fill();
           
           if (isTip) {
             ctx.strokeStyle = "white";
-            ctx.lineWidth = 1;
+            ctx.lineWidth = 2;
             ctx.stroke();
           }
         }
       });
 
-      // Finger connections
+      // Hand Skeleton
       const connections = [
         [0, 1, 2, 3, 4], // thumb
         [0, 5, 6, 7, 8], // index
-        [9, 10, 11, 12], // middle
-        [13, 14, 15, 16], // ring
-        [17, 18, 19, 20], // pinky
+        [0, 9, 10, 11, 12], // middle
+        [0, 13, 14, 15, 16], // ring
+        [0, 17, 18, 19, 20], // pinky
         [0, 5, 9, 13, 17, 0] // palm
       ];
 
       ctx.strokeStyle = "#00FF00";
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 3;
       connections.forEach(path => {
         ctx.beginPath();
         let started = false;
-        for (let i = 0; i < path.length; i++) {
-          const p = hp[path[i]];
-          if (p.score! > 0.3) {
+        path.forEach(idx => {
+          const p = hp[idx];
+          if (p.score! > 0.1) {
             if (!started) {
               ctx.moveTo(p.x, p.y);
               started = true;
@@ -329,7 +327,7 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
               ctx.lineTo(p.x, p.y);
             }
           }
-        }
+        });
         ctx.stroke();
       });
     });
