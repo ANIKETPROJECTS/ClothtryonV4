@@ -107,7 +107,7 @@ export default function ProductDetail() {
                 <button
                   key={idx}
                   onClick={() => setActiveImage(idx)}
-                  className={`aspect-square rounded-md overflow-hidden border-2 transition-all flex flex-col items-center ${
+                  className={`aspect-square rounded-md overflow-hidden border-2 transition-all flex flex-col items-center bg-white ${
                     activeImage === idx ? "border-primary" : "border-transparent opacity-60 hover:opacity-100"
                   }`}
                 >
