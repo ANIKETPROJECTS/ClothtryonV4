@@ -82,7 +82,7 @@ export default function ProductDetail() {
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="aspect-[3/4] bg-neutral-900 rounded-lg overflow-hidden relative group"
+              className="aspect-[3/4] bg-white rounded-lg overflow-hidden relative group"
             >
               {images[activeImage] && (
                 <img 
