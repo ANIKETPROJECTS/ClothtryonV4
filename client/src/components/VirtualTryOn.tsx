@@ -184,33 +184,37 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
           Math.pow(hipCenterY - shoulderCenterY, 2)
         );
 
-        // Rotation angle of the torso (shoulders)
-        const angle = Math.atan2(
+        // Rotation angle of the torso (shoulders) - capped for stability
+        let angle = Math.atan2(
           rightShoulder.y - leftShoulder.y,
           rightShoulder.x - leftShoulder.x
         );
+        
+        // Cap rotation to prevent weird angles (e.g., +/- 15 degrees)
+        const maxRotation = Math.PI / 12; 
+        angle = Math.max(-maxRotation, Math.min(maxRotation, angle));
 
         ctx.save();
         // Anchor to shoulder center
         ctx.translate(shoulderCenterX, shoulderCenterY);
-        // Correct for inverted shirt (added PI) and rotate with shoulders
+        // Correct for inverted shirt (added PI) and rotate with capped angle
         ctx.rotate(angle + Math.PI);
 
-        // Calculate scales to fit the torso rectangle
-        // We want the shirt width to cover shoulders and height to cover torso
-        const scaleX = (shoulderWidth * 1.4) / shirtImg.width; // 1.4 for a bit of extra width/overlap
-        const scaleY = (torsoHeight * 1.1) / shirtImg.height; // 1.1 to cover from shoulder to hip
+        // Calculate scales to fit the torso rectangle with extra size
+        // Increased scale factors for a "bigger" look
+        const scaleX = (shoulderWidth * 1.6) / shirtImg.width; 
+        const scaleY = (torsoHeight * 1.3) / shirtImg.height; 
         
         ctx.scale(scaleX, scaleY);
 
         // Position adjustment: Since we rotate 180 (PI), Y axis is flipped.
         // Image top (y=0) should be at shoulder line (anchor).
         // Image bottom (y=height) should be at hip line.
-        // In the rotated space, image is drawn from ( -w/2, 0 ) to ( w/2, h )
+        // We shift it up slightly (-0.05) to ensure it covers the shoulders fully
         ctx.drawImage(
           shirtImg, 
           -shirtImg.width / 2, 
-          0 
+          -shirtImg.height * 0.05
         );
 
         ctx.restore();
