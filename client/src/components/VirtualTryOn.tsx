@@ -242,25 +242,27 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
         
         // Move to center of torso (approximate anchor point)
         // Adjust vertical offset slightly up to cover shoulders properly
+        // Anchor at the midpoint between shoulders
         const anchorX = shoulderCenterX;
         const anchorY = shoulderCenterY;
 
         ctx.translate(anchorX, anchorY);
-        // Correct rotation: if the shirt is upside down, we might need to adjust the angle 
-        // or ensure the coordinate system is right. Since canvas is mirrored via CSS, 
-        // we need to be careful with the rotation direction.
-        ctx.rotate(-angle); 
+        
+        // Use the angle between shoulders for rotation
+        ctx.rotate(angle); 
 
-        // Scale
+        // Scale based on shoulder width
         const scale = (shoulderWidth * TSHIRT_CONFIG.calibration.scaleFactor) / shirtImg.width;
         ctx.scale(scale, scale);
 
-        // Draw Image (Centered)
-        // Adjust Y offset: T-shirt center is usually lower than shoulders
+        // Draw Image (Centered horizontally, aligned vertically with shoulders)
+        // Adjust Y offset: Since the image is being drawn from the center, we need to push it down
+        // so the collar sits on the shoulder line. 
+        // A vertical offset of 0.35 * height puts the collar roughly at the anchor point.
         ctx.drawImage(
           shirtImg, 
           -shirtImg.width / 2, 
-          -shirtImg.height * 0.1 + TSHIRT_CONFIG.calibration.verticalOffset // Moved down from 0.15 to 0.1
+          -shirtImg.height * 0.12 + TSHIRT_CONFIG.calibration.verticalOffset 
         );
 
         ctx.restore();
