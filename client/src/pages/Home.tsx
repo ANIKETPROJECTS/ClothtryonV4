@@ -28,9 +28,7 @@ export default function Home() {
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
         {/* Background Video/Image Mockup */}
         <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent z-10" />
-          {/* Using unsplash with description comment */}
-          {/* Fashion model dark luxury studio */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-black/70 z-10" />
           <img 
             src="https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=2576&auto=format&fit=crop" 
             alt="Hero Background" 
@@ -38,7 +36,7 @@ export default function Home() {
           />
         </div>
 
-        <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex flex-col items-center text-center">
           <motion.div 
             initial="initial"
             animate="animate"
@@ -46,7 +44,7 @@ export default function Home() {
               initial: { opacity: 0 },
               animate: { opacity: 1, transition: { staggerChildren: 0.1 } }
             }}
-            className="max-w-3xl"
+            className="max-w-4xl flex flex-col items-center"
           >
             <motion.span variants={fadeInUp} className="inline-block text-primary font-bold tracking-widest uppercase text-sm mb-4 border border-primary/30 px-4 py-2 bg-primary/10 backdrop-blur-sm rounded-full">
               Fall / Winter 2025
@@ -57,7 +55,7 @@ export default function Home() {
               <span className="text-gradient">Digital Luxury</span>
             </motion.h1>
             
-            <motion.p variants={fadeInUp} className="text-lg md:text-xl text-neutral-300 mb-8 max-w-xl leading-relaxed">
+            <motion.p variants={fadeInUp} className="text-lg md:text-xl text-neutral-300 mb-8 max-w-2xl leading-relaxed">
               Experience the future of fashion with our AI-powered Virtual Try-On technology. 
               Premium materials meet cutting-edge innovation.
             </motion.p>
