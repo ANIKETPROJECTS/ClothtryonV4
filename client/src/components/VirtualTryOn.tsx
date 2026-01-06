@@ -167,48 +167,56 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
         setCurrentView(detectedView);
       }
 
-        // Draw tracking lines for body only - changed to Gold for contrast
-        drawTrackingOverlay(ctx, keypoints);
+      // Select Image
+      const shirtImg = shirtImages.current[currentView];
+      if (shirtImg) {
+        const shoulderCenterX = (leftShoulder.x + rightShoulder.x) / 2;
+        const shoulderCenterY = (leftShoulder.y + rightShoulder.y) / 2;
+        const hipCenterX = (leftHip.x + rightHip.x) / 2;
+        const hipCenterY = (leftHip.y + rightHip.y) / 2;
 
-        const shirtImg = shirtImages.current[currentView];
-        if (shirtImg) {
-          const shoulderCenterX = (leftShoulder.x + rightShoulder.x) / 2;
-          const shoulderCenterY = (leftShoulder.y + rightShoulder.y) / 2;
-          const shoulderWidth = Math.sqrt(
-            Math.pow(rightShoulder.x - leftShoulder.x, 2) +
-            Math.pow(rightShoulder.y - leftShoulder.y, 2)
-          );
-          // Angle of shoulders
-          const angle = Math.atan2(
-            rightShoulder.y - leftShoulder.y,
-            rightShoulder.x - leftShoulder.x
-          );
+        const shoulderWidth = Math.sqrt(
+          Math.pow(rightShoulder.x - leftShoulder.x, 2) +
+          Math.pow(rightShoulder.y - leftShoulder.y, 2)
+        );
+        const torsoHeight = Math.sqrt(
+          Math.pow(hipCenterX - shoulderCenterX, 2) +
+          Math.pow(hipCenterY - shoulderCenterY, 2)
+        );
 
-          ctx.save();
-          // Anchor to midpoint between shoulders
-          ctx.translate(shoulderCenterX, shoulderCenterY);
-          
-          // Rotation: Add Math.PI (180 degrees) if the image is inverted
-          // We also need to flip the angle because of the CSS mirroring
-          ctx.rotate(angle + Math.PI);
-          
-          const scale = (shoulderWidth * TSHIRT_CONFIG.calibration.scaleFactor) / shirtImg.width;
-          ctx.scale(scale, scale);
+        // Rotation angle of the torso (shoulders)
+        const angle = Math.atan2(
+          rightShoulder.y - leftShoulder.y,
+          rightShoulder.x - leftShoulder.x
+        );
 
-          // Position adjustment: Since we rotated 180 deg, we now need to adjust
-          // the Y offset in the opposite direction. 
-          // The collar area should stay at the shoulder line.
-          // Changed -0.85 to -0.05 to shift the image DOWN into the torso rectangle
-          ctx.drawImage(
-            shirtImg, 
-            -shirtImg.width / 2, 
-            -shirtImg.height * 0.05 + TSHIRT_CONFIG.calibration.verticalOffset 
-          );
+        ctx.save();
+        // Anchor to shoulder center
+        ctx.translate(shoulderCenterX, shoulderCenterY);
+        // Correct for inverted shirt (added PI) and rotate with shoulders
+        ctx.rotate(angle + Math.PI);
 
-          ctx.restore();
-        }
+        // Calculate scales to fit the torso rectangle
+        // We want the shirt width to cover shoulders and height to cover torso
+        const scaleX = (shoulderWidth * 1.4) / shirtImg.width; // 1.4 for a bit of extra width/overlap
+        const scaleY = (torsoHeight * 1.1) / shirtImg.height; // 1.1 to cover from shoulder to hip
+        
+        ctx.scale(scaleX, scaleY);
+
+        // Position adjustment: Since we rotate 180 (PI), Y axis is flipped.
+        // Image top (y=0) should be at shoulder line (anchor).
+        // Image bottom (y=height) should be at hip line.
+        // In the rotated space, image is drawn from ( -w/2, 0 ) to ( w/2, h )
+        ctx.drawImage(
+          shirtImg, 
+          -shirtImg.width / 2, 
+          0 
+        );
+
+        ctx.restore();
       }
-    };
+    }
+  };
 
     const drawTrackingOverlay = (ctx: CanvasRenderingContext2D, keypoints: Keypoint[]) => {
       const points = ["left_shoulder", "right_shoulder", "left_hip", "right_hip", "left_elbow", "right_elbow", "left_wrist", "right_wrist"];
