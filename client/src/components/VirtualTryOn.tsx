@@ -178,14 +178,17 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
         const hipCenterX = (leftHip.x + rightHip.x) / 2;
         const hipCenterY = (leftHip.y + rightHip.y) / 2;
 
-        const shoulderWidth = Math.sqrt(
-          Math.pow(rightShoulder.x - leftShoulder.x, 2) +
-          Math.pow(rightShoulder.y - leftShoulder.y, 2)
-        );
-        const torsoHeight = Math.sqrt(
-          Math.pow(hipCenterX - shoulderCenterX, 2) +
-          Math.pow(hipCenterY - shoulderCenterY, 2)
-        );
+        // Calculate a stable shoulder width to prevent shrinking in profile/side views
+        // We use the maximum width seen or a factor that doesn't collapse
+        // When turning, the Euclidean distance between shoulders decreases, 
+        // but we want the shirt to stay wide.
+        const shoulderWidth = Math.abs(rightShoulder.x - leftShoulder.x);
+        const torsoHeight = Math.abs(hipCenterY - shoulderCenterY);
+
+        // Maintain a minimum width based on the video width to prevent "shrinking" when turning
+        // A typical shoulder width is about 30-40% of the video width
+        const minShoulderWidth = width * 0.4;
+        const stableWidth = Math.max(shoulderWidth, minShoulderWidth);
 
         // Set angle to 0 for a fixed, straight T-shirt that doesn't tilt with body movement
         const angle = 0;
@@ -197,18 +200,19 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
         ctx.rotate(angle);
 
         // Calculate scales to fit the torso rectangle with extra size
-        // Using larger scale factors as requested
-        const scaleX = (shoulderWidth * 1.8) / shirtImg.width; 
-        const scaleY = (torsoHeight * 1.5) / shirtImg.height; 
+        // Significantly increased scale factors for a "bigger" look
+        const scaleX = (stableWidth * 2.2) / shirtImg.width; 
+        const scaleY = (torsoHeight * 1.8) / shirtImg.height; 
         
         ctx.scale(scaleX, scaleY);
 
         // Position adjustment: Collar at shoulder line
         // Drawing from top (0) downwards
+        // Shift up slightly to ensure it covers the shoulders fully
         ctx.drawImage(
           shirtImg, 
           -shirtImg.width / 2, 
-          0
+          -shirtImg.height * 0.1
         );
 
         ctx.restore();
