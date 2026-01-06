@@ -246,18 +246,21 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
         const anchorY = shoulderCenterY;
 
         ctx.translate(anchorX, anchorY);
-        ctx.rotate(angle);
+        // Correct rotation: if the shirt is upside down, we might need to adjust the angle 
+        // or ensure the coordinate system is right. Since canvas is mirrored via CSS, 
+        // we need to be careful with the rotation direction.
+        ctx.rotate(-angle); 
 
         // Scale
         const scale = (shoulderWidth * TSHIRT_CONFIG.calibration.scaleFactor) / shirtImg.width;
         ctx.scale(scale, scale);
 
         // Draw Image (Centered)
-        // Adjust Y offset based on config
+        // Adjust Y offset: T-shirt center is usually lower than shoulders
         ctx.drawImage(
           shirtImg, 
           -shirtImg.width / 2, 
-          -shirtImg.height * 0.15 + TSHIRT_CONFIG.calibration.verticalOffset // 15% up to align neck
+          -shirtImg.height * 0.1 + TSHIRT_CONFIG.calibration.verticalOffset // Moved down from 0.15 to 0.1
         );
 
         ctx.restore();
