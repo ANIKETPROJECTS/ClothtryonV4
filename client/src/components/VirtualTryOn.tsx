@@ -3,6 +3,7 @@ import Webcam from "react-webcam";
 import * as tf from "@tensorflow/tfjs-core";
 import "@tensorflow/tfjs-backend-webgl";
 import * as poseDetection from "@tensorflow-models/pose-detection";
+import * as handPoseDetection from "@tensorflow-models/hand-pose-detection";
 import { motion, AnimatePresence } from "framer-motion";
 import { Camera, X, RefreshCw, AlertCircle } from "lucide-react";
 import { TSHIRT_CONFIG } from "@/lib/tshirt-config";
@@ -14,12 +15,14 @@ interface VirtualTryOnProps {
 
 type Pose = poseDetection.Pose;
 type Keypoint = poseDetection.Keypoint;
+type Hand = handPoseDetection.Hand;
 
 export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [model, setModel] = useState<poseDetection.PoseDetector | null>(null);
+  const [handModel, setHandModel] = useState<handPoseDetection.HandDetector | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [metrics, setMetrics] = useState({ fps: 0, confidence: 0 });
   const [currentView, setCurrentView] = useState<'front' | 'back' | 'left' | 'right'>('front');
@@ -27,9 +30,11 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
   const shirtImages = useRef<{ [key: string]: HTMLImageElement }>({});
 
   useEffect(() => {
-    const loadModel = async () => {
+    const loadModels = async () => {
       try {
         await tf.ready();
+        
+        // Load Pose Detector
         const detectorConfig: poseDetection.MoveNetModelConfig = {
           modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING,
           enableSmoothing: true
@@ -38,10 +43,22 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
           poseDetection.SupportedModels.MoveNet,
           detectorConfig
         );
+        
+        // Load Hand Detector
+        const handDetector = await handPoseDetection.createDetector(
+          handPoseDetection.SupportedModels.MediaPipeHands,
+          {
+            runtime: "tfjs",
+            modelType: "full",
+            maxHands: 2
+          }
+        );
+
         setModel(detector);
+        setHandModel(handDetector);
         setIsLoading(false);
       } catch (err) {
-        console.error("Failed to load pose model:", err);
+        console.error("Failed to load models:", err);
         setError("Failed to initialize VTO engine. Please try again.");
         setIsLoading(false);
       }
@@ -55,7 +72,7 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
       });
     };
 
-    loadModel();
+    loadModels();
     preloadImages();
   }, []);
 
@@ -63,6 +80,7 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
     if (
       webcamRef.current?.video?.readyState === 4 &&
       model &&
+      handModel &&
       canvasRef.current
     ) {
       const video = webcamRef.current.video;
@@ -75,7 +93,10 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
       }
 
       const start = performance.now();
-      const poses = await model.estimatePoses(video, { flipHorizontal: false });
+      const [poses, hands] = await Promise.all([
+        model.estimatePoses(video, { flipHorizontal: false }),
+        handModel.estimateHands(video, { flipHorizontal: false })
+      ]);
       const end = performance.now();
       const fps = 1000 / (end - start);
 
@@ -85,14 +106,14 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
           fps: Math.round(fps), 
           confidence: Math.round((pose.score || 0) * 100) 
         });
-        drawCanvas(pose, videoWidth, videoHeight, canvasRef.current);
+        drawCanvas(pose, hands || [], videoWidth, videoHeight, canvasRef.current);
       } else {
         const ctx = canvasRef.current.getContext("2d");
         if (ctx) ctx.clearRect(0, 0, videoWidth, videoHeight);
         setMetrics(prev => ({ ...prev, fps: Math.round(fps), confidence: 0 }));
       }
     }
-  }, [model, currentView]);
+  }, [model, handModel, currentView]);
 
   useEffect(() => {
     let animationFrameId: number;
@@ -104,7 +125,7 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
       animationFrameId = requestAnimationFrame(loop);
     };
 
-    if (!isLoading && model) {
+    if (!isLoading && model && handModel) {
       loop();
     }
 
@@ -112,9 +133,9 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
       isRunning = false;
       cancelAnimationFrame(animationFrameId);
     };
-  }, [detect, isLoading, model]);
+  }, [detect, isLoading, model, handModel]);
 
-  const drawCanvas = (pose: Pose, width: number, height: number, canvas: HTMLCanvasElement | null) => {
+  const drawCanvas = (pose: Pose, hands: Hand[], width: number, height: number, canvas: HTMLCanvasElement | null) => {
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
@@ -151,14 +172,12 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
         
         if (hasNose) {
           const noseOffset = (nose.x - shoulderCenterX) / (shoulderWidth / 2);
-          // Swapped 'left' and 'right' logic to fix the mirrored image issue
           if (noseOffset > 0.6) detectedView = 'left';
           else if (noseOffset < -0.6) detectedView = 'right';
           else detectedView = 'front';
         } else if (facePointsCount >= 1) {
           detectedView = 'front';
         } else if (earPointsCount === 1) {
-          // Swapped 'left' and 'right' logic here too
           detectedView = leftEar?.score! > rightEar?.score! ? 'right' : 'left';
         } else {
           detectedView = 'front';
@@ -171,8 +190,8 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
         setCurrentView(detectedView);
       }
 
-      // Draw tracking lines for body only
-      drawTrackingOverlay(ctx, keypoints);
+      // Draw tracking lines for body and hands
+      drawTrackingOverlay(ctx, keypoints, hands);
 
       // Select Image
       const shirtImg = shirtImages.current[currentView];
@@ -182,30 +201,20 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
         const hipCenterX = (leftHip.x + rightHip.x) / 2;
         const hipCenterY = (leftHip.y + rightHip.y) / 2;
 
-        // Calculate a stable shoulder width to prevent shrinking in profile/side views
         const shoulderWidth = Math.abs(rightShoulder.x - leftShoulder.x);
         const torsoHeight = Math.abs(hipCenterY - shoulderCenterY);
 
-        // Maintain a minimum width based on the video width to prevent "shrinking" when turning
         const minShoulderWidth = width * 0.4;
         const stableWidth = Math.max(shoulderWidth, minShoulderWidth);
 
-        // Use a uniform scale to prevent stretching and keep the T-shirt "normal"
-        // Reducing scale factor slightly to make the T-shirt just a little smaller
         const scale = (stableWidth * 1.35) / shirtImg.width;
-
-        // Set angle to 0 for a fixed, straight T-shirt
         const angle = 0;
 
         ctx.save();
-        // Anchor to shoulder center
         ctx.translate(shoulderCenterX, shoulderCenterY);
         ctx.rotate(angle);
-        
         ctx.scale(scale, scale);
 
-        // Position adjustment: Shift T-shirt upwards
-        // Moving from -0.18 to -0.15 to lower it slightly as requested
         ctx.drawImage(
           shirtImg, 
           -shirtImg.width / 2, 
@@ -218,8 +227,6 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
         if (currentView === 'left' || currentView === 'right') {
           const drawArmSegment = (p1?: Keypoint, p2?: Keypoint) => {
             if (p1 && p1.score! > minConfidence && p2 && p2.score! > minConfidence) {
-              // We only want elbow to wrist/ahead
-              // But to look natural we draw the whole segment
               ctx.beginPath();
               ctx.strokeStyle = "#00FF00";
               ctx.lineWidth = 4;
@@ -235,10 +242,8 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
           const rightWrist = keypoints.find(k => k.name === "right_wrist");
 
           if (currentView === 'left') {
-            // In left view (facing left), the right arm is usually more visible/ahead
             drawArmSegment(rightElbow, rightWrist);
           } else {
-            // In right view, the left arm is ahead
             drawArmSegment(leftElbow, leftWrist);
           }
         }
@@ -246,11 +251,10 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
     }
   };
 
-  const drawTrackingOverlay = (ctx: CanvasRenderingContext2D, keypoints: Keypoint[]) => {
+  const drawTrackingOverlay = (ctx: CanvasRenderingContext2D, keypoints: Keypoint[], hands: Hand[]) => {
     const points = ["left_shoulder", "right_shoulder", "left_hip", "right_hip", "left_elbow", "right_elbow", "left_wrist", "right_wrist"];
     const found = points.map(name => keypoints.find(k => k.name === name));
     
-    // Bright Green (#00FF00) for maximum visibility as requested
     ctx.strokeStyle = "#00FF00";
     ctx.lineWidth = 4;
     ctx.lineCap = "round";
@@ -266,12 +270,51 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
       }
     };
 
-    drawLine(ls, rs); // shoulders
-    drawLine(ls, lh); // left torso
-    drawLine(rs, rh); // right torso
-    drawLine(lh, rh); // hips
-    drawLine(ls, le); drawLine(le, lw); // left arm
-    drawLine(rs, re); drawLine(re, rw); // right arm
+    drawLine(ls, rs);
+    drawLine(ls, lh);
+    drawLine(rs, rh);
+    drawLine(lh, rh);
+    drawLine(ls, le); drawLine(le, lw);
+    drawLine(rs, re); drawLine(re, rw);
+
+    // Draw Hands
+    ctx.lineWidth = 2;
+    hands.forEach(hand => {
+      const hp = hand.keypoints;
+      
+      // Draw joints
+      hp.forEach(kp => {
+        if (kp.score! > 0.3) {
+          ctx.beginPath();
+          ctx.arc(kp.x, kp.y, 3, 0, 2 * Math.PI);
+          ctx.fillStyle = "#00FF00";
+          ctx.fill();
+        }
+      });
+
+      // Finger connections
+      const connections = [
+        [0, 1, 2, 3, 4], // thumb
+        [0, 5, 6, 7, 8], // index
+        [9, 10, 11, 12], // middle
+        [13, 14, 15, 16], // ring
+        [17, 18, 19, 20], // pinky
+        [0, 5, 9, 13, 17, 0] // palm
+      ];
+
+      connections.forEach(path => {
+        ctx.beginPath();
+        for (let i = 0; i < path.length - 1; i++) {
+          const p1 = hp[path[i]];
+          const p2 = hp[path[i+1]];
+          if (p1.score! > 0.3 && p2.score! > 0.3) {
+            if (i === 0) ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+          }
+        }
+        ctx.stroke();
+      });
+    });
   };
 
   const capturePhoto = () => {
