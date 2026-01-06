@@ -100,6 +100,12 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
       const end = performance.now();
       const fps = 1000 / (end - start);
 
+      if (hands && hands.length > 0) {
+        console.log(`[Hand Detection] Detected ${hands.length} hand(s)`, hands);
+      } else {
+        console.debug("[Hand Detection] No hands detected");
+      }
+
       if (poses && poses.length > 0) {
         const pose = poses[0];
         setMetrics({ 
