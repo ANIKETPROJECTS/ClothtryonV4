@@ -170,8 +170,8 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
       const earPointsCount = [hasLeftEar, hasRightEar].filter(Boolean).length;
 
       // Logic:
-      // 1. If we see eyes or nose clearly, it's NOT the back.
-      if (facePointsCount >= 2) { // Need at least 2 face points for Front
+      // 1. If any face point is detected, assume it might be front.
+      if (facePointsCount >= 1 || earPointsCount >= 1) { 
         const shoulderCenter = (leftShoulder.x + rightShoulder.x) / 2;
         const shoulderWidth = Math.abs(rightShoulder.x - leftShoulder.x);
         
@@ -182,19 +182,15 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
           if (noseOffset > 0.6) detectedView = 'right';
           else if (noseOffset < -0.6) detectedView = 'left';
           else detectedView = 'front';
+        } else if (facePointsCount >= 1) {
+          detectedView = 'front';
+        } else if (earPointsCount === 1) {
+          detectedView = hasLeftEar ? 'left' : 'right';
         } else {
           detectedView = 'front';
         }
       } 
-      // 2. If no face points but we see both ears, it's likely the back
-      else if (earPointsCount === 2 && facePointsCount === 0) {
-        detectedView = 'back';
-      }
-      // 3. If we see one ear and no face, it's side profile
-      else if (earPointsCount === 1 && facePointsCount === 0) {
-        detectedView = hasLeftEar ? 'left' : 'right';
-      }
-      // 4. Default to back if face isn't clear
+      // 2. If no face points at all, it's likely the back
       else {
         detectedView = 'back';
       }
@@ -326,6 +322,47 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
 
     drawArm(leftShoulder, leftElbow, leftWrist);
     drawArm(rightShoulder, rightElbow, rightWrist);
+
+    // Draw Comprehensive Face Mesh (Nose, Eyes, Ears)
+    const nose = keypoints.find((k) => k.name === "nose");
+    const leftEye = keypoints.find((k) => k.name === "left_eye");
+    const rightEye = keypoints.find((k) => k.name === "right_eye");
+    const leftEar = keypoints.find((k) => k.name === "left_ear");
+    const rightEar = keypoints.find((k) => k.name === "right_ear");
+
+    const faceConfidence = 0.3;
+    
+    // Draw connections if points are visible
+    if (nose && leftEye && nose.score! > faceConfidence && leftEye.score! > faceConfidence) {
+      ctx.beginPath();
+      ctx.moveTo(nose.x, nose.y);
+      ctx.lineTo(leftEye.x, leftEye.y);
+      ctx.stroke();
+    }
+    if (nose && rightEye && nose.score! > faceConfidence && rightEye.score! > faceConfidence) {
+      ctx.beginPath();
+      ctx.moveTo(nose.x, nose.y);
+      ctx.lineTo(rightEye.x, rightEye.y);
+      ctx.stroke();
+    }
+    if (leftEye && leftEar && leftEye.score! > faceConfidence && leftEar.score! > faceConfidence) {
+      ctx.beginPath();
+      ctx.moveTo(leftEye.x, leftEye.y);
+      ctx.lineTo(leftEar.x, leftEar.y);
+      ctx.stroke();
+    }
+    if (rightEye && rightEar && rightEye.score! > faceConfidence && rightEar.score! > faceConfidence) {
+      ctx.beginPath();
+      ctx.moveTo(rightEye.x, rightEye.y);
+      ctx.lineTo(rightEar.x, rightEar.y);
+      ctx.stroke();
+    }
+    if (leftEye && rightEye && leftEye.score! > faceConfidence && rightEye.score! > faceConfidence) {
+      ctx.beginPath();
+      ctx.moveTo(leftEye.x, leftEye.y);
+      ctx.lineTo(rightEye.x, rightEye.y);
+      ctx.stroke();
+    }
   };
 
   const capturePhoto = () => {
