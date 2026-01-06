@@ -179,40 +179,33 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
         const hipCenterY = (leftHip.y + rightHip.y) / 2;
 
         // Calculate a stable shoulder width to prevent shrinking in profile/side views
-        // We use the maximum width seen or a factor that doesn't collapse
-        // When turning, the Euclidean distance between shoulders decreases, 
-        // but we want the shirt to stay wide.
         const shoulderWidth = Math.abs(rightShoulder.x - leftShoulder.x);
         const torsoHeight = Math.abs(hipCenterY - shoulderCenterY);
 
         // Maintain a minimum width based on the video width to prevent "shrinking" when turning
-        // A typical shoulder width is about 30-40% of the video width
         const minShoulderWidth = width * 0.4;
         const stableWidth = Math.max(shoulderWidth, minShoulderWidth);
 
-        // Set angle to 0 for a fixed, straight T-shirt that doesn't tilt with body movement
+        // Use a uniform scale to prevent stretching and keep the T-shirt "normal"
+        // We'll base it on the width and apply the same to height
+        const scale = (stableWidth * 2.1) / shirtImg.width;
+
+        // Set angle to 0 for a fixed, straight T-shirt
         const angle = 0;
 
         ctx.save();
         // Anchor to shoulder center
         ctx.translate(shoulderCenterX, shoulderCenterY);
-        // Rotation is now fixed at 0 as requested
         ctx.rotate(angle);
-
-        // Calculate scales to fit the torso rectangle with extra size
-        // Significantly increased scale factors for a "bigger" look
-        const scaleX = (stableWidth * 2.2) / shirtImg.width; 
-        const scaleY = (torsoHeight * 1.8) / shirtImg.height; 
         
-        ctx.scale(scaleX, scaleY);
+        ctx.scale(scale, scale);
 
-        // Position adjustment: Collar at shoulder line
-        // Drawing from top (0) downwards
-        // Shift up slightly to ensure it covers the shoulders fully
+        // Position adjustment: Shift T-shirt upwards
+        // -0.25 moves it up significantly from the shoulder line anchor
         ctx.drawImage(
           shirtImg, 
           -shirtImg.width / 2, 
-          -shirtImg.height * 0.1
+          -shirtImg.height * 0.25
         );
 
         ctx.restore();
