@@ -12,6 +12,37 @@ const fadeInUp = {
   transition: { duration: 0.6 }
 };
 
+function TimelineItem({ year, title, desc, side }: { year: string, title: string, desc: string, side: 'left' | 'right' }) {
+  return (
+    <div className={`relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active`}>
+      <div className="flex items-center justify-center w-10 h-10 rounded-full border border-neutral-800 bg-background text-primary font-bold shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
+        {year.slice(-2)}
+      </div>
+      <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-6 rounded-xl border border-white/5 bg-neutral-900/50 backdrop-blur-sm">
+        <div className="flex items-center justify-between space-x-2 mb-1">
+          <div className="font-bold text-white text-xl">{title}</div>
+          <time className="font-mono text-sm text-primary">{year}</time>
+        </div>
+        <div className="text-neutral-400">{desc}</div>
+      </div>
+    </div>
+  );
+}
+
+function FeatureItem({ icon, title, desc }: { icon: React.ReactNode, title: string, desc: string }) {
+  return (
+    <div className="flex items-start p-4 rounded-xl hover:bg-white/5 transition-colors border border-transparent hover:border-white/5">
+      <div className="p-2 bg-white/5 rounded-lg mr-4 text-primary">
+        {icon}
+      </div>
+      <div>
+        <h3 className="font-display font-bold text-white text-lg">{title}</h3>
+        <p className="text-sm text-neutral-400 mt-1">{desc}</p>
+      </div>
+    </div>
+  );
+}
+
 export default function About() {
   return (
     <div className="min-h-screen bg-background text-foreground">
