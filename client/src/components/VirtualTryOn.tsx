@@ -63,6 +63,15 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
   const [verticalOffset, setVerticalOffset] = useState(0);
   const gestureCooldown = useRef(false);
   const lastPose = useRef<Pose | null>(null);
+  const activeGestures = useRef<{
+    leftWrist: boolean;
+    rightWrist: boolean;
+    bothWrists: boolean;
+  }>({
+    leftWrist: false,
+    rightWrist: false,
+    bothWrists: false,
+  });
 
   const detect = useCallback(async () => {
     if (
@@ -156,37 +165,54 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
       rightHip && rightHip.score! > minConfidence
     ) {
       // Gesture Detection
-      if (!gestureCooldown.current) {
-        if (leftWrist && rightWrist && leftWrist.score! > 0.5 && rightWrist.score! > 0.5) {
-          const leftWristRaised = leftWrist.y < leftShoulder.y;
-          const rightWristRaised = rightWrist.y < rightShoulder.y;
+      if (leftWrist && rightWrist && leftWrist.score! > 0.5 && rightWrist.score! > 0.5) {
+        const leftWristRaised = leftWrist.y < leftShoulder.y;
+        const rightWristRaised = rightWrist.y < rightShoulder.y;
 
-          if (leftWristRaised && rightWristRaised) {
+        // Both wrists raised
+        if (leftWristRaised && rightWristRaised) {
+          if (!activeGestures.current.bothWrists) {
             setVerticalOffset(prev => {
               const next = Math.max(prev - 0.05, -0.5);
-              console.log(`Gesture: Both wrists raised - Shifting T-shirt up. New Offset: ${next.toFixed(2)}`);
+              console.log(`Gesture Triggered: Both wrists raised - Shifting T-shirt up. New Offset: ${next.toFixed(2)}`);
               return next;
             });
-            gestureCooldown.current = true;
-            setTimeout(() => gestureCooldown.current = false, 150);
-          } else if (rightWristRaised) {
+            activeGestures.current.bothWrists = true;
+          }
+        } else {
+          activeGestures.current.bothWrists = false;
+        }
+
+        // Right wrist raised (only if both not raised)
+        if (rightWristRaised && !leftWristRaised) {
+          if (!activeGestures.current.rightWrist) {
             setSizeScale(prev => {
               const next = Math.min(prev + 0.1, 3.0);
-              console.log(`Gesture: Right wrist raised - Increasing T-shirt size. New Scale: ${next.toFixed(2)}`);
+              console.log(`Gesture Triggered: Right wrist raised - Increasing T-shirt size. New Scale: ${next.toFixed(2)}`);
               return next;
             });
-            gestureCooldown.current = true;
-            setTimeout(() => gestureCooldown.current = false, 150);
-          } else if (leftWristRaised) {
+            activeGestures.current.rightWrist = true;
+          }
+        } else {
+          activeGestures.current.rightWrist = false;
+        }
+
+        // Left wrist raised (only if both not raised)
+        if (leftWristRaised && !rightWristRaised) {
+          if (!activeGestures.current.leftWrist) {
             setSizeScale(prev => {
               const next = Math.max(prev - 0.1, 0.4);
-              console.log(`Gesture: Left wrist raised - Decreasing T-shirt size. New Scale: ${next.toFixed(2)}`);
+              console.log(`Gesture Triggered: Left wrist raised - Decreasing T-shirt size. New Scale: ${next.toFixed(2)}`);
               return next;
             });
-            gestureCooldown.current = true;
-            setTimeout(() => gestureCooldown.current = false, 150);
+            activeGestures.current.leftWrist = true;
           }
+        } else {
+          activeGestures.current.leftWrist = false;
         }
+      } else {
+        // Reset all if wrists are lost or lowered
+        activeGestures.current = { leftWrist: false, rightWrist: false, bothWrists: false };
       }
 
       // Orientation Detection logic
