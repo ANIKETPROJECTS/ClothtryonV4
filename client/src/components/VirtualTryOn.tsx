@@ -154,18 +154,27 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
           const rightWristRaised = rightWrist.y < rightShoulder.y;
 
           if (leftWristRaised && rightWristRaised) {
-            console.log("Gesture: Both wrists raised - Shifting T-shirt up");
-            setVerticalOffset(prev => Math.max(prev - 0.05, -0.3));
+            setVerticalOffset(prev => {
+              const next = Math.max(prev - 0.1, -0.5);
+              console.log(`Gesture: Both wrists raised - Shifting T-shirt up. New Offset: ${next.toFixed(2)}`);
+              return next;
+            });
             gestureCooldown.current = true;
-            setTimeout(() => gestureCooldown.current = false, 150); // Faster cooldown
+            setTimeout(() => gestureCooldown.current = false, 150);
           } else if (rightWristRaised) {
-            console.log("Gesture: Right wrist raised - Increasing T-shirt size");
-            setSizeScale(prev => Math.min(prev + 0.05, 2.0));
+            setSizeScale(prev => {
+              const next = Math.min(prev + 0.3, 3.0);
+              console.log(`Gesture: Right wrist raised - Increasing T-shirt size. New Scale: ${next.toFixed(2)}`);
+              return next;
+            });
             gestureCooldown.current = true;
             setTimeout(() => gestureCooldown.current = false, 150);
           } else if (leftWristRaised) {
-            console.log("Gesture: Left wrist raised - Decreasing T-shirt size");
-            setSizeScale(prev => Math.max(prev - 0.05, 0.5));
+            setSizeScale(prev => {
+              const next = Math.max(prev - 0.3, 0.4);
+              console.log(`Gesture: Left wrist raised - Decreasing T-shirt size. New Scale: ${next.toFixed(2)}`);
+              return next;
+            });
             gestureCooldown.current = true;
             setTimeout(() => gestureCooldown.current = false, 150);
           }
