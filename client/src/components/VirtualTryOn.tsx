@@ -34,22 +34,21 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
       try {
         await tf.ready();
         
-        // Load Pose Detector
-        const detectorConfig: poseDetection.MoveNetModelConfig = {
-          modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING,
-          enableSmoothing: true
-        };
+        // Load Pose Detector - Using BlazePose for more robust tracking (33 keypoints)
         const detector = await poseDetection.createDetector(
-          poseDetection.SupportedModels.MoveNet,
-          detectorConfig
+          poseDetection.SupportedModels.BlazePose,
+          {
+            runtime: "tfjs",
+            modelType: "full",
+            enableSmoothing: true
+          }
         );
         
-        // Load Hand Detector with MediaPipe runtime for significantly better accuracy and speed
+        // Load Hand Detector - Switching back to tfjs runtime for better compatibility
         const handDetector = await handPoseDetection.createDetector(
           handPoseDetection.SupportedModels.MediaPipeHands,
           {
-            runtime: "mediapipe",
-            solutionPath: "https://cdn.jsdelivr.net/npm/@mediapipe/hands",
+            runtime: "tfjs",
             modelType: "full",
             maxHands: 2
           }
@@ -285,18 +284,19 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
       
       // Draw all hand keypoints
       hp.forEach((kp, index) => {
-        if (kp.score! > 0.1) { // Lowered confidence threshold for hands
+        // Lowered threshold even further to ensure we catch anything the model finds
+        if (kp.score! > 0.05) { 
           ctx.beginPath();
           const isTip = fingerTips.includes(index);
-          const radius = isTip ? 8 : 3;
+          const radius = isTip ? 10 : 4; // Larger markers
           
           ctx.arc(kp.x, kp.y, radius, 0, 2 * Math.PI);
-          ctx.fillStyle = isTip ? "#00FF00" : "rgba(0, 255, 0, 0.6)";
+          ctx.fillStyle = isTip ? "#00FF00" : "rgba(0, 255, 0, 0.4)";
           ctx.fill();
           
           if (isTip) {
             ctx.strokeStyle = "white";
-            ctx.lineWidth = 2;
+            ctx.lineWidth = 3;
             ctx.stroke();
           }
         }
