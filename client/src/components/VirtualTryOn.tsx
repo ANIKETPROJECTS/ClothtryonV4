@@ -114,6 +114,10 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
     };
   }, [detect, isLoading, model]);
 
+  const [sizeScale, setSizeScale] = useState(1);
+  const [verticalOffset, setVerticalOffset] = useState(0);
+  const gestureCooldown = useRef(false);
+
   const drawCanvas = (pose: Pose, width: number, height: number, canvas: HTMLCanvasElement | null) => {
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
@@ -131,6 +135,10 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
     const rightEye = keypoints.find((k) => k.name === "right_eye");
     const leftEar = keypoints.find((k) => k.name === "left_ear");
     const rightEar = keypoints.find((k) => k.name === "right_ear");
+    const leftElbow = keypoints.find(k => k.name === "left_elbow");
+    const leftWrist = keypoints.find(k => k.name === "left_wrist");
+    const rightElbow = keypoints.find(k => k.name === "right_elbow");
+    const rightWrist = keypoints.find(k => k.name === "right_wrist");
 
     const minConfidence = 0.35;
     if (
@@ -139,6 +147,34 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
       leftHip && leftHip.score! > minConfidence &&
       rightHip && rightHip.score! > minConfidence
     ) {
+      // Gesture Detection
+      if (!gestureCooldown.current) {
+        // Both arms extended (horizontal-ish)
+        if (leftWrist && rightWrist && leftWrist.score! > 0.5 && rightWrist.score! > 0.5) {
+          const armSpan = Math.abs(leftWrist.x - rightWrist.x);
+          const shoulderWidth = Math.abs(leftShoulder.x - rightShoulder.x);
+          
+          // Both hands raised above head
+          if (leftWrist.y < nose!.y && rightWrist.y < nose!.y) {
+             setVerticalOffset(prev => Math.max(prev - 0.05, -0.3));
+             gestureCooldown.current = true;
+             setTimeout(() => gestureCooldown.current = false, 1000);
+          }
+          // Both arms extended wide
+          else if (armSpan > shoulderWidth * 2.5) {
+            setSizeScale(prev => Math.min(prev + 0.1, 2.0));
+            gestureCooldown.current = true;
+            setTimeout(() => gestureCooldown.current = false, 1000);
+          }
+          // Hands crossed (wrists close together and past shoulders)
+          else if (Math.abs(leftWrist.x - rightWrist.x) < shoulderWidth * 0.3) {
+            setSizeScale(prev => Math.max(prev - 0.1, 0.5));
+            gestureCooldown.current = true;
+            setTimeout(() => gestureCooldown.current = false, 1000);
+          }
+        }
+      }
+
       // Orientation Detection logic
       const hasNose = nose && nose.score! > 0.3;
       const facePointsCount = [hasNose, leftEye?.score! > 0.3, rightEye?.score! > 0.3].filter(Boolean).length;
@@ -192,7 +228,7 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
 
         // Use a uniform scale to prevent stretching and keep the T-shirt "normal"
         // Reducing scale factor slightly to make the T-shirt just a little smaller
-        const scale = (stableWidth * 1.35) / shirtImg.width;
+        const scale = ((stableWidth * 1.35) / shirtImg.width) * sizeScale;
 
         // Set angle to 0 for a fixed, straight T-shirt
         const angle = 0;
@@ -209,7 +245,7 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
         ctx.drawImage(
           shirtImg, 
           -shirtImg.width / 2, 
-          -shirtImg.height * 0.15
+          (-shirtImg.height * 0.15) + (shirtImg.height * verticalOffset)
         );
 
         ctx.restore();
