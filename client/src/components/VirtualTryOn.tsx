@@ -164,78 +164,76 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
       leftHip && leftHip.score! > minConfidence &&
       rightHip && rightHip.score! > minConfidence
     ) {
-      // Gesture Detection
-      if (leftWrist && rightWrist && leftWrist.score! > 0.5 && rightWrist.score! > 0.5) {
-        const leftWristRaised = leftWrist.y < leftShoulder.y;
-        const rightWristRaised = rightWrist.y < rightShoulder.y;
+      // Gesture Detection: Left hand wide only -> Up, Right hand wide only -> Down
+      const shoulderWidth = Math.abs(rightShoulder.x - leftShoulder.x);
+      const shoulderCenterX = (leftShoulder.x + rightShoulder.x) / 2;
 
-        // Both wrists raised
-        if (leftWristRaised && rightWristRaised) {
+      let isDoingOffsetGesture = false;
+      if (leftWrist && rightWrist && leftWrist.score! > 0.5 && rightWrist.score! > 0.5) {
+        const leftWristWide = Math.abs(leftWrist.x - shoulderCenterX) > shoulderWidth * 1.5;
+        const rightWristWide = Math.abs(rightWrist.x - shoulderCenterX) > shoulderWidth * 1.5;
+
+        // Left hand wide only -> Up
+        if (leftWristWide && !rightWristWide) {
+          isDoingOffsetGesture = true;
           if (!activeGestures.current.bothWrists) {
             setVerticalOffset(prev => {
               const next = Math.max(prev - 0.05, -0.5);
-              console.log(`Gesture Triggered: Both wrists raised - Shifting T-shirt up. New Offset: ${next.toFixed(2)}`);
+              console.log(`Gesture Triggered: Left wrist wide - Shifting T-shirt up. New Offset: ${next.toFixed(2)}`);
               return next;
             });
             activeGestures.current.bothWrists = true;
           }
-          // Prevent size scaling when both wrists are raised
-          activeGestures.current.rightWrist = true;
-          activeGestures.current.leftWrist = true;
-        } else if (leftWrist && rightWrist && leftWrist.score! > 0.5 && rightWrist.score! > 0.5) {
-          // Check for crossed arms (wrists on opposite sides of the center)
-          const shoulderCenterX = (leftShoulder.x + rightShoulder.x) / 2;
-          const isCrossed = (leftWrist.x < shoulderCenterX && rightWrist.x > shoulderCenterX);
-          
-          if (isCrossed) {
-            if (!activeGestures.current.bothWrists) {
-              setVerticalOffset(prev => {
-                const next = Math.min(prev + 0.05, 0.5);
-                console.log(`Gesture Triggered: Crossed arms - Shifting T-shirt down. New Offset: ${next.toFixed(2)}`);
-                return next;
-              });
-              activeGestures.current.bothWrists = true;
-            }
-            // Prevent size scaling when arms are crossed
-            activeGestures.current.rightWrist = true;
-            activeGestures.current.leftWrist = true;
-          } else if (!leftWristRaised && !rightWristRaised) {
-            activeGestures.current.bothWrists = false;
+        } 
+        // Right hand wide only -> Down
+        else if (rightWristWide && !leftWristWide) {
+          isDoingOffsetGesture = true;
+          if (!activeGestures.current.bothWrists) {
+            setVerticalOffset(prev => {
+              const next = Math.min(prev + 0.05, 0.5);
+              console.log(`Gesture Triggered: Right wrist wide - Shifting T-shirt down. New Offset: ${next.toFixed(2)}`);
+              return next;
+            });
+            activeGestures.current.bothWrists = true;
           }
-        } else {
+        } 
+        // Reset when hands are back in
+        else if (!leftWristWide && !rightWristWide) {
           activeGestures.current.bothWrists = false;
         }
+      } else {
+        activeGestures.current.bothWrists = false;
+      }
 
-        // Right wrist raised (only if both not raised)
-        if (rightWristRaised && !leftWristRaised) {
-          if (!activeGestures.current.rightWrist) {
-            setSizeScale(prev => {
-              const next = Math.min(prev + 0.1, 3.0);
-              console.log(`Gesture Triggered: Right wrist raised - Increasing T-shirt size. New Scale: ${next.toFixed(2)}`);
-              return next;
-            });
-            activeGestures.current.rightWrist = true;
-          }
-        } else {
-          activeGestures.current.rightWrist = false;
-        }
+      const currentLeftWristRaised = leftWrist && leftWrist.score! > 0.5 && leftWrist.y < leftShoulder.y;
+      const currentRightWristRaised = rightWrist && rightWrist.score! > 0.5 && rightWrist.y < rightShoulder.y;
 
-        // Left wrist raised (only if both not raised)
-        if (leftWristRaised && !rightWristRaised) {
-          if (!activeGestures.current.leftWrist) {
-            setSizeScale(prev => {
-              const next = Math.max(prev - 0.1, 0.4);
-              console.log(`Gesture Triggered: Left wrist raised - Decreasing T-shirt size. New Scale: ${next.toFixed(2)}`);
-              return next;
-            });
-            activeGestures.current.leftWrist = true;
-          }
-        } else {
-          activeGestures.current.leftWrist = false;
+      // Right wrist raised (only if not doing offset gesture)
+      if (currentRightWristRaised && !currentLeftWristRaised && !isDoingOffsetGesture) {
+        if (!activeGestures.current.rightWrist) {
+          setSizeScale(prev => {
+            const next = Math.min(prev + 0.1, 3.0);
+            console.log(`Gesture Triggered: Right wrist raised - Increasing T-shirt size. New Scale: ${next.toFixed(2)}`);
+            return next;
+          });
+          activeGestures.current.rightWrist = true;
         }
       } else {
-        // Reset all if wrists are lost or lowered
-        activeGestures.current = { leftWrist: false, rightWrist: false, bothWrists: false };
+        activeGestures.current.rightWrist = false;
+      }
+
+      // Left wrist raised (only if not doing offset gesture)
+      if (currentLeftWristRaised && !currentRightWristRaised && !isDoingOffsetGesture) {
+        if (!activeGestures.current.leftWrist) {
+          setSizeScale(prev => {
+            const next = Math.max(prev - 0.1, 0.4);
+            console.log(`Gesture Triggered: Left wrist raised - Decreasing T-shirt size. New Scale: ${next.toFixed(2)}`);
+            return next;
+          });
+          activeGestures.current.leftWrist = true;
+        }
+      } else {
+        activeGestures.current.leftWrist = false;
       }
 
       // Orientation Detection logic
