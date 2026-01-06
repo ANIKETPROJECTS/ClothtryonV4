@@ -187,20 +187,13 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
           Math.pow(hipCenterY - shoulderCenterY, 2)
         );
 
-        // Rotation angle of the torso (shoulders) - capped for stability
-        let angle = Math.atan2(
-          rightShoulder.y - leftShoulder.y,
-          rightShoulder.x - leftShoulder.x
-        );
-        
-        // Cap rotation to prevent weird angles (e.g., +/- 10 degrees)
-        const maxRotation = Math.PI / 18; 
-        angle = Math.max(-maxRotation, Math.min(maxRotation, angle));
+        // Set angle to 0 for a fixed, straight T-shirt that doesn't tilt with body movement
+        const angle = 0;
 
         ctx.save();
         // Anchor to shoulder center
         ctx.translate(shoulderCenterX, shoulderCenterY);
-        // Correct for inverted shirt: Removing any Math.PI additions
+        // Rotation is now fixed at 0 as requested
         ctx.rotate(angle);
 
         // Calculate scales to fit the torso rectangle with extra size
