@@ -1,0 +1,122 @@
+Perfect! Here's the updated comprehensive prompt for Replit:
+
+---
+
+**PROMPT FOR REPLIT:**
+
+Create a premium single-page virtual try-on web application for ONYU brand t-shirts with the following specifications:
+
+## Core Features:
+
+1. **Landing Page:**
+   - Modern, high-end UI design with smooth animations
+   - Brand name "ONYU" prominently displayed in the header with elegant logo/typography
+   - Hero section showcasing a single t-shirt product
+   - Large, high-quality product images with zoom capability
+   - Product details (name, price, description, size chart)
+   - Prominent "Try Virtual Try-On" button with engaging hover effects
+   - Responsive design that works flawlessly on mobile and desktop
+   - Footer with ONYU branding
+
+2. **Virtual Try-On Camera System:**
+   - Opens full-screen camera view on both mobile and desktop
+   - Implements real-time body pose detection using TensorFlow.js with PoseNet or MoveNet model
+   - Tracks 17+ body keypoints for accurate t-shirt placement
+   - Overlays t-shirt image that follows body movement in real-time
+   - Shows 4 different t-shirt views based on body orientation:
+     * Front view (when facing camera)
+     * Left side view (when body turns left)
+     * Right side view (when body turns right)
+     * Back view (when facing away - detected by pose estimation)
+
+3. **Real-time Metrics Display:**
+   - Accuracy indicator showing pose detection confidence (0-100%)
+   - Size estimation based on body proportions (S, M, L, XL, XXL)
+   - Visual indicators for proper positioning
+   - FPS counter for performance monitoring
+   - All metrics displayed with clean, minimal UI that doesn't obstruct the view
+
+4. **T-shirt Image Handling:**
+   - Support for 4 images per t-shirt (front, back, left side, right side)
+   - Smart orientation detection to switch between views seamlessly
+   - Proper scaling and perspective transformation to match body dimensions
+   - Smooth transitions between different views (use interpolation for natural feel)
+
+## Technical Requirements:
+
+- Use vanilla JavaScript or React for the frontend
+- Integrate TensorFlow.js with MoveNet (Thunder or Lightning) for accurate body tracking
+- Use MediaPipe Pose as an alternative for maximum accuracy
+- Implement canvas rendering for t-shirt overlay
+- Ensure camera access works on both iOS Safari and Android Chrome
+- Add proper error handling for camera permissions and device compatibility
+- Optimize for consistent 30+ FPS performance
+- Make it work offline-capable with service workers if possible
+
+## UI/UX Design Guidelines:
+
+**Branding:**
+- Use "ONYU" as the brand name throughout
+- Create a sophisticated, memorable logo treatment for ONYU
+- Suggest a premium color palette (e.g., black/charcoal with gold/bronze accents, or minimalist monochrome)
+
+**Design Style:**
+- Modern, clean aesthetic with generous white space
+- Implement micro-interactions and buttery-smooth transitions
+- Use glassmorphism or subtle gradients for depth
+- Add loading states with branded skeleton screens
+- Include intuitive gesture controls (pinch to zoom, swipe)
+- Show helpful onboarding tooltips for first-time users
+- Add "Capture Photo" button to save the virtual try-on result with ONYU watermark
+- Include "Exit Try-On" button to return to product page
+- Make controls minimalistic and non-intrusive during try-on
+- Typography should feel premium (suggest: Inter, Sora, or similar modern sans-serif)
+
+## Image Configuration:
+
+Create a configuration system where I can easily replace the 4 t-shirt images:
+```javascript
+const tshirtImages = {
+  front: 'path/to/front.png',
+  back: 'path/to/back.png',
+  left: 'path/to/left-side.png',
+  right: 'path/to/right-side.png'
+};
+```
+
+Include clear instructions in comments on image requirements (resolution, format, transparency).
+
+## Additional Features:
+
+- Add calibration step to improve size accuracy (ask user to stand at arm's length)
+- Show silhouette guide to help users position correctly
+- Display body measurements estimation in real-time
+- Include "How it works" modal explaining the ONYU virtual try-on technology
+- Add social sharing capability for captured photos with ONYU branding
+- Include accessibility features (ARIA labels, keyboard navigation)
+- Add "Share your look" feature with Instagram/Twitter integration
+
+## Performance Optimization:
+
+- Lazy load the ML models only when try-on is activated
+- Show engaging loading animation with ONYU branding while model loads
+- Compress and optimize t-shirt images (use WebP with PNG fallback)
+- Use Web Workers for pose detection to keep UI thread responsive
+- Implement proper memory management to prevent leaks
+- Add fallback UI for devices that don't support required features
+- Cache models locally after first load
+
+## Error Handling:
+
+- Graceful camera permission denial handling
+- Device compatibility checks with helpful messages
+- Network error handling for model loading
+- Low-light detection with suggestions to improve lighting
+
+Please create a fully functional, production-ready application with clean, well-documented code. The design should be Instagram-worthy with attention to every detail - typography, spacing, colors, and animations should all feel premium and polished, befitting the ONYU brand identity.
+
+The overall vibe should be: **cutting-edge technology meets luxury fashion.**
+
+---
+
+This prompt now includes your ONYU branding throughout. Would you like me to add any other specific requirements or adjust the brand positioning?

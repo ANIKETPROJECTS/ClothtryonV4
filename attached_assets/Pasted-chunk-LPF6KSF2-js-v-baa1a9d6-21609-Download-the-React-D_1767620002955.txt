@@ -1,0 +1,48 @@
+chunk-LPF6KSF2.js?v=baa1a9d6:21609 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+ProductDetail.tsx:148 Uncaught TypeError: Cannot read properties of undefined (reading 'map')
+    at ProductDetail (ProductDetail.tsx:148:34)
+    at renderWithHooks (chunk-LPF6KSF2.js?v=baa1a9d6:11596:26)
+    at updateFunctionComponent (chunk-LPF6KSF2.js?v=baa1a9d6:14630:28)
+    at beginWork (chunk-LPF6KSF2.js?v=baa1a9d6:15972:22)
+    at HTMLUnknownElement.callCallback2 (chunk-LPF6KSF2.js?v=baa1a9d6:3680:22)
+    at Object.invokeGuardedCallbackDev (chunk-LPF6KSF2.js?v=baa1a9d6:3705:24)
+    at invokeGuardedCallback (chunk-LPF6KSF2.js?v=baa1a9d6:3739:39)
+    at beginWork$1 (chunk-LPF6KSF2.js?v=baa1a9d6:19818:15)
+    at performUnitOfWork (chunk-LPF6KSF2.js?v=baa1a9d6:19251:20)
+    at workLoopSync (chunk-LPF6KSF2.js?v=baa1a9d6:19190:13)
+ProductDetail.tsx:148 Uncaught TypeError: Cannot read properties of undefined (reading 'map')
+    at ProductDetail (ProductDetail.tsx:148:34)
+    at renderWithHooks (chunk-LPF6KSF2.js?v=baa1a9d6:11596:26)
+    at updateFunctionComponent (chunk-LPF6KSF2.js?v=baa1a9d6:14630:28)
+    at beginWork (chunk-LPF6KSF2.js?v=baa1a9d6:15972:22)
+    at HTMLUnknownElement.callCallback2 (chunk-LPF6KSF2.js?v=baa1a9d6:3680:22)
+    at Object.invokeGuardedCallbackDev (chunk-LPF6KSF2.js?v=baa1a9d6:3705:24)
+    at invokeGuardedCallback (chunk-LPF6KSF2.js?v=baa1a9d6:3739:39)
+    at beginWork$1 (chunk-LPF6KSF2.js?v=baa1a9d6:19818:15)
+    at performUnitOfWork (chunk-LPF6KSF2.js?v=baa1a9d6:19251:20)
+    at workLoopSync (chunk-LPF6KSF2.js?v=baa1a9d6:19190:13)
+chunk-LPF6KSF2.js?v=baa1a9d6:14080 The above error occurred in the <ProductDetail> component:
+
+    at ProductDetail (https://3da875b2-3912-47de-a279-a41d3afb5940-00-2nhi0u93i07z0.kirk.replit.dev/src/pages/ProductDetail.tsx:29:18)
+    at Route (https://3da875b2-3912-47de-a279-a41d3afb5940-00-2nhi0u93i07z0.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=baa1a9d6:322:16)
+    at Switch (https://3da875b2-3912-47de-a279-a41d3afb5940-00-2nhi0u93i07z0.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=baa1a9d6:378:17)
+    at Router
+    at Provider (https://3da875b2-3912-47de-a279-a41d3afb5940-00-2nhi0u93i07z0.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-XQLTDROY.js?v=baa1a9d6:71:15)
+    at TooltipProvider (https://3da875b2-3912-47de-a279-a41d3afb5940-00-2nhi0u93i07z0.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=baa1a9d6:2245:5)
+    at QueryClientProvider (https://3da875b2-3912-47de-a279-a41d3afb5940-00-2nhi0u93i07z0.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=baa1a9d6:2747:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+logCapturedError @ chunk-LPF6KSF2.js?v=baa1a9d6:14080
+chunk-LPF6KSF2.js?v=baa1a9d6:9176 Uncaught TypeError: Cannot read properties of undefined (reading 'map')
+    at ProductDetail (ProductDetail.tsx:148:34)
+    at renderWithHooks (chunk-LPF6KSF2.js?v=baa1a9d6:11596:26)
+    at updateFunctionComponent (chunk-LPF6KSF2.js?v=baa1a9d6:14630:28)
+    at beginWork (chunk-LPF6KSF2.js?v=baa1a9d6:15972:22)
+    at beginWork$1 (chunk-LPF6KSF2.js?v=baa1a9d6:19806:22)
+    at performUnitOfWork (chunk-LPF6KSF2.js?v=baa1a9d6:19251:20)
+    at workLoopSync (chunk-LPF6KSF2.js?v=baa1a9d6:19190:13)
+    at renderRootSync (chunk-LPF6KSF2.js?v=baa1a9d6:19169:15)
+    at recoverFromConcurrentError (chunk-LPF6KSF2.js?v=baa1a9d6:18786:28)
+    at performSyncWorkOnRoot (chunk-LPF6KSF2.js?v=baa1a9d6:18932:28)

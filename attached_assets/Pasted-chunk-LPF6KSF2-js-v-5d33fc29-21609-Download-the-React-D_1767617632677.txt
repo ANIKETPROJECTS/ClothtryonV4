@@ -1,0 +1,48 @@
+chunk-LPF6KSF2.js?v=5d33fc29:21609 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+Home.tsx:175 Uncaught ReferenceError: Scan is not defined
+    at Home (Home.tsx:175:21)
+    at renderWithHooks (chunk-LPF6KSF2.js?v=5d33fc29:11596:26)
+    at mountIndeterminateComponent (chunk-LPF6KSF2.js?v=5d33fc29:14974:21)
+    at beginWork (chunk-LPF6KSF2.js?v=5d33fc29:15962:22)
+    at HTMLUnknownElement.callCallback2 (chunk-LPF6KSF2.js?v=5d33fc29:3680:22)
+    at Object.invokeGuardedCallbackDev (chunk-LPF6KSF2.js?v=5d33fc29:3705:24)
+    at invokeGuardedCallback (chunk-LPF6KSF2.js?v=5d33fc29:3739:39)
+    at beginWork$1 (chunk-LPF6KSF2.js?v=5d33fc29:19818:15)
+    at performUnitOfWork (chunk-LPF6KSF2.js?v=5d33fc29:19251:20)
+    at workLoopSync (chunk-LPF6KSF2.js?v=5d33fc29:19190:13)
+Home.tsx:175 Uncaught ReferenceError: Scan is not defined
+    at Home (Home.tsx:175:21)
+    at renderWithHooks (chunk-LPF6KSF2.js?v=5d33fc29:11596:26)
+    at mountIndeterminateComponent (chunk-LPF6KSF2.js?v=5d33fc29:14974:21)
+    at beginWork (chunk-LPF6KSF2.js?v=5d33fc29:15962:22)
+    at HTMLUnknownElement.callCallback2 (chunk-LPF6KSF2.js?v=5d33fc29:3680:22)
+    at Object.invokeGuardedCallbackDev (chunk-LPF6KSF2.js?v=5d33fc29:3705:24)
+    at invokeGuardedCallback (chunk-LPF6KSF2.js?v=5d33fc29:3739:39)
+    at beginWork$1 (chunk-LPF6KSF2.js?v=5d33fc29:19818:15)
+    at performUnitOfWork (chunk-LPF6KSF2.js?v=5d33fc29:19251:20)
+    at workLoopSync (chunk-LPF6KSF2.js?v=5d33fc29:19190:13)
+chunk-LPF6KSF2.js?v=5d33fc29:14080 The above error occurred in the <Home> component:
+
+    at Home (https://86490bb7-091d-498e-883c-274018c1b3b4-00-1h7v446zgifc9.janeway.replit.dev/src/pages/Home.tsx:31:41)
+    at Route (https://86490bb7-091d-498e-883c-274018c1b3b4-00-1h7v446zgifc9.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=2522d1ac:322:16)
+    at Switch (https://86490bb7-091d-498e-883c-274018c1b3b4-00-1h7v446zgifc9.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=2522d1ac:378:17)
+    at Router
+    at Provider (https://86490bb7-091d-498e-883c-274018c1b3b4-00-1h7v446zgifc9.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-XQLTDROY.js?v=5d33fc29:71:15)
+    at TooltipProvider (https://86490bb7-091d-498e-883c-274018c1b3b4-00-1h7v446zgifc9.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=43dddeda:2245:5)
+    at QueryClientProvider (https://86490bb7-091d-498e-883c-274018c1b3b4-00-1h7v446zgifc9.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=09481a08:2747:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+logCapturedError @ chunk-LPF6KSF2.js?v=5d33fc29:14080
+chunk-LPF6KSF2.js?v=5d33fc29:19466 Uncaught ReferenceError: Scan is not defined
+    at Home (Home.tsx:175:21)
+    at renderWithHooks (chunk-LPF6KSF2.js?v=5d33fc29:11596:26)
+    at mountIndeterminateComponent (chunk-LPF6KSF2.js?v=5d33fc29:14974:21)
+    at beginWork (chunk-LPF6KSF2.js?v=5d33fc29:15962:22)
+    at beginWork$1 (chunk-LPF6KSF2.js?v=5d33fc29:19806:22)
+    at performUnitOfWork (chunk-LPF6KSF2.js?v=5d33fc29:19251:20)
+    at workLoopSync (chunk-LPF6KSF2.js?v=5d33fc29:19190:13)
+    at renderRootSync (chunk-LPF6KSF2.js?v=5d33fc29:19169:15)
+    at recoverFromConcurrentError (chunk-LPF6KSF2.js?v=5d33fc29:18786:28)
+    at performConcurrentWorkOnRoot (chunk-LPF6KSF2.js?v=5d33fc29:18734:30)
