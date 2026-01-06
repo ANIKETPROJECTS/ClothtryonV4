@@ -20,7 +20,7 @@ export function ProductCard({ product, index }: ProductCardProps) {
       className="group relative"
     >
       <Link href={`/product/${product.id}`} className="block">
-        <div className="relative aspect-[3/4] overflow-hidden bg-neutral-900 rounded-sm">
+        <div className="relative aspect-[3/4] overflow-hidden bg-white rounded-sm">
           {/* Main Image */}
           <img
             src={images.front || "https://placehold.co/600x800/1a1a1a/gold?text=Product"}
