@@ -9,6 +9,8 @@ import Shop from "@/pages/Shop";
 import ProductDetail from "@/pages/ProductDetail";
 import About from "@/pages/About";
 
+import Collections from "@/pages/Collections";
+
 function Router() {
   return (
     <Switch>
@@ -16,7 +18,7 @@ function Router() {
       <Route path="/shop" component={Shop} />
       <Route path="/product/:id" component={ProductDetail} />
       <Route path="/about" component={About} />
-      <Route path="/collections" component={Shop} /> 
+      <Route path="/collections" component={Collections} /> 
       <Route component={NotFound} />
     </Switch>
   );

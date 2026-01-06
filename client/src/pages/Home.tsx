@@ -6,6 +6,8 @@ import { Navigation } from "@/components/Navigation";
 import { ProductCard } from "@/components/ProductCard";
 import { useProducts } from "@/hooks/use-products";
 import type { Product } from "@shared/schema";
+import luxuryFabricImg from "@assets/generated_images/luxury_fabric_texture_background_dark.png";
+import sustainableStudioImg from "@assets/generated_images/sustainable_fashion_studio_background_black.png";
 
 // Helper for animations
 const fadeInUp = {
@@ -95,6 +97,53 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {/* The Craft Section */}
+      <section className="py-24 relative overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <div className="absolute inset-0 bg-black/80 z-10" />
+          <img src={luxuryFabricImg} alt="Craftsmanship" className="w-full h-full object-cover" />
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
+          <div className="max-w-2xl">
+            <h2 className="text-4xl md:text-5xl font-display font-bold text-white mb-8">Uncompromising <span className="text-primary">Craftsmanship</span></h2>
+            <p className="text-lg text-neutral-300 mb-8 leading-relaxed">
+              Every ONYU garment is a result of meticulous material studies. From the weight of our jersey to the reinforcement of every seam, we prioritize longevity over trends.
+            </p>
+            <div className="grid grid-cols-2 gap-8">
+              <div>
+                <span className="text-3xl font-display font-bold text-white block mb-2">240GSM</span>
+                <p className="text-sm text-neutral-500 uppercase tracking-widest">Heavyweight Cotton</p>
+              </div>
+              <div>
+                <span className="text-3xl font-display font-bold text-white block mb-2">100%</span>
+                <p className="text-sm text-neutral-500 uppercase tracking-widest">Organic Sourcing</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Sustainability Section */}
+      <section className="py-24 bg-background">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-2 gap-16 items-center">
+            <div className="order-2 md:order-1 relative aspect-square bg-neutral-900 rounded-sm overflow-hidden">
+              <img src={sustainableStudioImg} alt="Sustainability" className="w-full h-full object-cover" />
+            </div>
+            <div className="order-1 md:order-2">
+              <span className="text-primary font-mono text-sm uppercase tracking-widest mb-4 block">Ethics & Future</span>
+              <h2 className="text-4xl font-display font-bold text-white mb-6">Designed to Last. <br/>Produced with Intent.</h2>
+              <p className="text-lg text-neutral-400 mb-8 leading-relaxed">
+                We reject fast fashion cycles. Our production is localized, minimizing carbon footprints while maximizing ethical standards for every artisan in our supply chain.
+              </p>
+              <Link href="/about" className="text-white font-bold border-b border-primary pb-1 hover:text-primary transition-colors">
+                Our Impact Report
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Featured Products */}
       <section id="featured" className="py-24 bg-background">

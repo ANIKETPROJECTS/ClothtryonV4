@@ -3,6 +3,9 @@ import { Navigation } from "@/components/Navigation";
 import { ShieldCheck, Zap, Globe, Users } from "lucide-react";
 import { Link } from "wouter";
 
+import sustainableStudioImg from "@assets/generated_images/sustainable_fashion_studio_background_black.png";
+import luxuryFabricImg from "@assets/generated_images/luxury_fabric_texture_background_dark.png";
+
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0 },
@@ -37,7 +40,7 @@ export default function About() {
             className="aspect-square bg-neutral-900 rounded-2xl overflow-hidden"
           >
             <img 
-              src="https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2670&auto=format&fit=crop" 
+              src={sustainableStudioImg} 
               alt="Our Process" 
               className="w-full h-full object-cover opacity-80"
             />
@@ -69,6 +72,16 @@ export default function About() {
             </div>
           </div>
         </div>
+
+        {/* Timeline Section */}
+        <section className="mb-32">
+          <h2 className="text-4xl font-display font-bold text-white mb-16 text-center">The Journey</h2>
+          <div className="space-y-12 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-neutral-800 before:to-transparent">
+            <TimelineItem year="2023" title="Foundation" desc="ONYU was born from a desire to merge luxury apparel with digital innovation." side="left" />
+            <TimelineItem year="2024" title="VTO V1.0" desc="Launched our proprietary real-time pose tracking engine." side="right" />
+            <TimelineItem year="2025" title="The Future" desc="Scaling our sustainable production and refined garment studies." side="left" />
+          </div>
+        </section>
 
         {/* FAQ Section */}
         <section className="mb-32">
