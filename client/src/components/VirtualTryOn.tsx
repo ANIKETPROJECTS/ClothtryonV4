@@ -149,31 +149,25 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
     ) {
       // Gesture Detection
       if (!gestureCooldown.current) {
-        // Both arms extended (horizontal-ish)
-        if (leftWrist && rightWrist && leftWrist.score! > 0.5 && rightWrist.score! > 0.5) {
-          const armSpan = Math.abs(leftWrist.x - rightWrist.x);
-          const shoulderWidth = Math.abs(leftShoulder.x - rightShoulder.x);
-          
-          // Both hands raised above head
-          if (leftWrist.y < nose!.y && rightWrist.y < nose!.y) {
-             console.log("Gesture Detected: Hands Raised Up - Shifting T-shirt up");
-             setVerticalOffset(prev => Math.max(prev - 0.05, -0.3));
-             gestureCooldown.current = true;
-             setTimeout(() => gestureCooldown.current = false, 1000);
-          }
-          // Both arms extended wide
-          else if (armSpan > shoulderWidth * 2.0) { // Reduced threshold from 2.5 to 2.0 for easier detection
-            console.log("Gesture Detected: Arms Extended Wide - Increasing T-shirt size");
-            setSizeScale(prev => Math.min(prev + 0.1, 2.0));
+        if (leftElbow && rightElbow && leftElbow.score! > 0.5 && rightElbow.score! > 0.5) {
+          const leftElbowRaised = leftElbow.y < leftShoulder.y;
+          const rightElbowRaised = rightElbow.y < rightShoulder.y;
+
+          if (leftElbowRaised && rightElbowRaised) {
+            console.log("Gesture: Both elbows raised - Shifting T-shirt up");
+            setVerticalOffset(prev => Math.max(prev - 0.05, -0.3));
             gestureCooldown.current = true;
-            setTimeout(() => gestureCooldown.current = false, 1000);
-          }
-          // Hands crossed (wrists close together)
-          else if (Math.abs(leftWrist.x - rightWrist.x) < shoulderWidth * 0.5) { // Increased threshold from 0.3 to 0.5 for easier detection
-            console.log("Gesture Detected: Hands Crossed - Decreasing T-shirt size");
-            setSizeScale(prev => Math.max(prev - 0.1, 0.5));
+            setTimeout(() => gestureCooldown.current = false, 300);
+          } else if (rightElbowRaised) {
+            console.log("Gesture: Right elbow raised - Increasing T-shirt size");
+            setSizeScale(prev => Math.min(prev + 0.05, 2.0));
             gestureCooldown.current = true;
-            setTimeout(() => gestureCooldown.current = false, 1000);
+            setTimeout(() => gestureCooldown.current = false, 300);
+          } else if (leftElbowRaised) {
+            console.log("Gesture: Left elbow raised - Decreasing T-shirt size");
+            setSizeScale(prev => Math.max(prev - 0.05, 0.5));
+            gestureCooldown.current = true;
+            setTimeout(() => gestureCooldown.current = false, 300);
           }
         }
       }
