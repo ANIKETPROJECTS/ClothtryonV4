@@ -167,6 +167,9 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
         setCurrentView(detectedView);
       }
 
+      // Draw tracking lines for body only
+      drawTrackingOverlay(ctx, keypoints);
+
       // Select Image
       const shirtImg = shirtImages.current[currentView];
       if (shirtImg) {
@@ -190,31 +193,29 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
           rightShoulder.x - leftShoulder.x
         );
         
-        // Cap rotation to prevent weird angles (e.g., +/- 15 degrees)
-        const maxRotation = Math.PI / 12; 
+        // Cap rotation to prevent weird angles (e.g., +/- 10 degrees)
+        const maxRotation = Math.PI / 18; 
         angle = Math.max(-maxRotation, Math.min(maxRotation, angle));
 
         ctx.save();
         // Anchor to shoulder center
         ctx.translate(shoulderCenterX, shoulderCenterY);
-        // Correct for inverted shirt (added PI) and rotate with capped angle
-        ctx.rotate(angle + Math.PI);
+        // Correct for inverted shirt: Removing any Math.PI additions
+        ctx.rotate(angle);
 
         // Calculate scales to fit the torso rectangle with extra size
-        // Increased scale factors for a "bigger" look
-        const scaleX = (shoulderWidth * 1.6) / shirtImg.width; 
-        const scaleY = (torsoHeight * 1.3) / shirtImg.height; 
+        // Using larger scale factors as requested
+        const scaleX = (shoulderWidth * 1.8) / shirtImg.width; 
+        const scaleY = (torsoHeight * 1.5) / shirtImg.height; 
         
         ctx.scale(scaleX, scaleY);
 
-        // Position adjustment: Since we rotate 180 (PI), Y axis is flipped.
-        // Image top (y=0) should be at shoulder line (anchor).
-        // Image bottom (y=height) should be at hip line.
-        // We shift it up slightly (-0.05) to ensure it covers the shoulders fully
+        // Position adjustment: Collar at shoulder line
+        // Drawing from top (0) downwards
         ctx.drawImage(
           shirtImg, 
           -shirtImg.width / 2, 
-          -shirtImg.height * 0.05
+          0
         );
 
         ctx.restore();
@@ -222,14 +223,14 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
     }
   };
 
-    const drawTrackingOverlay = (ctx: CanvasRenderingContext2D, keypoints: Keypoint[]) => {
-      const points = ["left_shoulder", "right_shoulder", "left_hip", "right_hip", "left_elbow", "right_elbow", "left_wrist", "right_wrist"];
-      const found = points.map(name => keypoints.find(k => k.name === name));
-      
-      // Changed to Gold (#D4AF37) for better contrast and ONYU branding
-      ctx.strokeStyle = "#D4AF37";
-      ctx.lineWidth = 3;
-      ctx.lineCap = "round";
+  const drawTrackingOverlay = (ctx: CanvasRenderingContext2D, keypoints: Keypoint[]) => {
+    const points = ["left_shoulder", "right_shoulder", "left_hip", "right_hip", "left_elbow", "right_elbow", "left_wrist", "right_wrist"];
+    const found = points.map(name => keypoints.find(k => k.name === name));
+    
+    // Bright Green (#00FF00) for maximum visibility as requested
+    ctx.strokeStyle = "#00FF00";
+    ctx.lineWidth = 4;
+    ctx.lineCap = "round";
 
     const [ls, rs, lh, rh, le, re, lw, rw] = found;
 
