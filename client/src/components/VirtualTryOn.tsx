@@ -34,17 +34,17 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
       try {
         await tf.ready();
         
-        // Load Pose Detector - Using BlazePose for more robust tracking (33 keypoints)
+        // Reverting to MoveNet as it was stable for body tracking
+        const detectorConfig: poseDetection.MoveNetModelConfig = {
+          modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING,
+          enableSmoothing: true
+        };
         const detector = await poseDetection.createDetector(
-          poseDetection.SupportedModels.BlazePose,
-          {
-            runtime: "tfjs",
-            modelType: "full",
-            enableSmoothing: true
-          }
+          poseDetection.SupportedModels.MoveNet,
+          detectorConfig
         );
         
-        // Load Hand Detector - Switching back to tfjs runtime for better compatibility
+        // Hand Detector with tfjs runtime for better stability in this environment
         const handDetector = await handPoseDetection.createDetector(
           handPoseDetection.SupportedModels.MediaPipeHands,
           {
@@ -93,17 +93,23 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
       }
 
       const start = performance.now();
-      const [poses, hands] = await Promise.all([
-        model.estimatePoses(video, { flipHorizontal: false }),
-        handModel.estimateHands(video, { flipHorizontal: false })
-      ]);
+      
+      // Run detections sequentially to avoid potential WebGL context issues in parallel
+      const poses = await model.estimatePoses(video, { flipHorizontal: false });
+      let hands: Hand[] = [];
+      try {
+        if (handModel) {
+          hands = await handModel.estimateHands(video, { flipHorizontal: false });
+        }
+      } catch (err) {
+        console.warn("Hand detection skipped this frame:", err);
+      }
+      
       const end = performance.now();
       const fps = 1000 / (end - start);
 
       if (hands && hands.length > 0) {
-        console.log(`[Hand Detection] Detected ${hands.length} hand(s)`, hands);
-      } else {
-        console.debug("[Hand Detection] No hands detected");
+        console.log(`[Hand Detection] Detected ${hands.length} hand(s)`);
       }
 
       if (poses && poses.length > 0) {
