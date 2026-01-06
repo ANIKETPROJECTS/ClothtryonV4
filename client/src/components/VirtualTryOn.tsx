@@ -180,14 +180,15 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
             activeGestures.current.bothWrists = true;
           }
         } else if (leftWrist && rightWrist && leftWrist.score! > 0.5 && rightWrist.score! > 0.5) {
-          const shoulderWidth = Math.abs(rightShoulder.x - leftShoulder.x);
-          const wristDist = Math.abs(rightWrist.x - leftWrist.x);
+          // Check for crossed arms (wrists on opposite sides of the center)
+          const shoulderCenterX = (leftShoulder.x + rightShoulder.x) / 2;
+          const isCrossed = (leftWrist.x < shoulderCenterX && rightWrist.x > shoulderCenterX);
           
-          if (wristDist > shoulderWidth * 2.5) {
+          if (isCrossed) {
             if (!activeGestures.current.bothWrists) {
               setVerticalOffset(prev => {
                 const next = Math.min(prev + 0.01, 0.5);
-                console.log(`Gesture Triggered: Wrists apart - Shifting T-shirt down. New Offset: ${next.toFixed(2)}`);
+                console.log(`Gesture Triggered: Crossed arms - Shifting T-shirt down. New Offset: ${next.toFixed(2)}`);
                 return next;
               });
               activeGestures.current.bothWrists = true;
