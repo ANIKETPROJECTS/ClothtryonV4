@@ -149,25 +149,25 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
     ) {
       // Gesture Detection
       if (!gestureCooldown.current) {
-        if (leftElbow && rightElbow && leftElbow.score! > 0.5 && rightElbow.score! > 0.5) {
-          const leftElbowRaised = leftElbow.y < leftShoulder.y;
-          const rightElbowRaised = rightElbow.y < rightShoulder.y;
+        if (leftWrist && rightWrist && leftWrist.score! > 0.5 && rightWrist.score! > 0.5) {
+          const leftWristRaised = leftWrist.y < leftShoulder.y;
+          const rightWristRaised = rightWrist.y < rightShoulder.y;
 
-          if (leftElbowRaised && rightElbowRaised) {
-            console.log("Gesture: Both elbows raised - Shifting T-shirt up");
+          if (leftWristRaised && rightWristRaised) {
+            console.log("Gesture: Both wrists raised - Shifting T-shirt up");
             setVerticalOffset(prev => Math.max(prev - 0.05, -0.3));
             gestureCooldown.current = true;
-            setTimeout(() => gestureCooldown.current = false, 300);
-          } else if (rightElbowRaised) {
-            console.log("Gesture: Right elbow raised - Increasing T-shirt size");
+            setTimeout(() => gestureCooldown.current = false, 150); // Faster cooldown
+          } else if (rightWristRaised) {
+            console.log("Gesture: Right wrist raised - Increasing T-shirt size");
             setSizeScale(prev => Math.min(prev + 0.05, 2.0));
             gestureCooldown.current = true;
-            setTimeout(() => gestureCooldown.current = false, 300);
-          } else if (leftElbowRaised) {
-            console.log("Gesture: Left elbow raised - Decreasing T-shirt size");
+            setTimeout(() => gestureCooldown.current = false, 150);
+          } else if (leftWristRaised) {
+            console.log("Gesture: Left wrist raised - Decreasing T-shirt size");
             setSizeScale(prev => Math.max(prev - 0.05, 0.5));
             gestureCooldown.current = true;
-            setTimeout(() => gestureCooldown.current = false, 300);
+            setTimeout(() => gestureCooldown.current = false, 150);
           }
         }
       }
