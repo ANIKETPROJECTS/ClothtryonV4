@@ -201,11 +201,11 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
         ctx.scale(scale, scale);
 
         // Position adjustment: Shift T-shirt upwards
-        // Adjusting Y-offset for smaller scale to maintain collar alignment
+        // Moving from -0.12 to -0.18 to lift the shirt higher as requested
         ctx.drawImage(
           shirtImg, 
           -shirtImg.width / 2, 
-          -shirtImg.height * 0.12
+          -shirtImg.height * 0.18
         );
 
         ctx.restore();
