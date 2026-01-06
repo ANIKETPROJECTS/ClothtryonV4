@@ -4,7 +4,7 @@ import * as tf from "@tensorflow/tfjs-core";
 import "@tensorflow/tfjs-backend-webgl";
 import * as poseDetection from "@tensorflow-models/pose-detection";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, X, RefreshCw, AlertCircle } from "lucide-react";
+import { Camera, X, RefreshCw, AlertCircle, ChevronUp, ChevronDown } from "lucide-react";
 import { TSHIRT_CONFIG } from "@/lib/tshirt-config";
 
 interface VirtualTryOnProps {
@@ -431,10 +431,18 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
         <canvas ref={canvasRef} className="absolute inset-0 w-full h-full object-cover pointer-events-none transform -scale-x-100" />
 
         <div className="absolute bottom-8 left-0 right-0 flex justify-center items-center gap-6 z-20 px-6">
-          <div className="flex-1 flex justify-center">
+          <div className="flex flex-col gap-2">
+            <button 
+              onClick={() => setSizeScale(prev => Math.min(prev + 0.1, 3.0))}
+              className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white flex items-center justify-center font-bold"
+              title="Increase Size"
+            >
+              +
+            </button>
             <button 
               onClick={() => setSizeScale(prev => Math.max(prev - 0.1, 0.4))}
-              className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white flex items-center justify-center font-bold"
+              className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white flex items-center justify-center font-bold"
+              title="Decrease Size"
             >
               -
             </button>
@@ -444,12 +452,20 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
             <Camera className="w-8 h-8" />
           </button>
 
-          <div className="flex-1 flex justify-center">
+          <div className="flex flex-col gap-2">
             <button 
-              onClick={() => setSizeScale(prev => Math.min(prev + 0.1, 3.0))}
-              className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white flex items-center justify-center font-bold"
+              onClick={() => setVerticalOffset(prev => Math.max(prev - 0.05, -0.5))}
+              className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white flex items-center justify-center"
+              title="Move Up"
             >
-              +
+              <ChevronUp className="w-6 h-6" />
+            </button>
+            <button 
+              onClick={() => setVerticalOffset(prev => Math.min(prev + 0.05, 0.5))}
+              className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white flex items-center justify-center"
+              title="Move Down"
+            >
+              <ChevronDown className="w-6 h-6" />
             </button>
           </div>
         </div>
