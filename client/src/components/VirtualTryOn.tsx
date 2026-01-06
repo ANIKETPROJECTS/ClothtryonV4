@@ -417,17 +417,50 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
           </div>
         )}
 
-        <Webcam ref={webcamRef} audio={false} className="absolute inset-0 w-full h-full object-cover" mirrored={true} />
+        <Webcam 
+          ref={webcamRef} 
+          audio={false} 
+          className="absolute inset-0 w-full h-full object-cover" 
+          mirrored={true}
+          videoConstraints={{
+            facingMode: "user",
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          }} 
+        />
         <canvas ref={canvasRef} className="absolute inset-0 w-full h-full object-cover pointer-events-none transform -scale-x-100" />
 
-        <div className="absolute bottom-12 left-0 right-0 flex justify-center items-center z-20">
-          <button onClick={capturePhoto} className="group relative flex items-center justify-center w-20 h-20 rounded-full bg-white text-black shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:scale-110 transition-transform">
+        <div className="absolute bottom-8 left-0 right-0 flex justify-center items-center gap-6 z-20 px-6">
+          <div className="flex-1 flex justify-center">
+            <button 
+              onClick={() => setSizeScale(prev => Math.max(prev - 0.1, 0.4))}
+              className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white flex items-center justify-center font-bold"
+            >
+              -
+            </button>
+          </div>
+          
+          <button onClick={capturePhoto} className="group relative flex items-center justify-center w-20 h-20 rounded-full bg-white text-black shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:scale-110 transition-transform flex-shrink-0">
             <Camera className="w-8 h-8" />
           </button>
+
+          <div className="flex-1 flex justify-center">
+            <button 
+              onClick={() => setSizeScale(prev => Math.min(prev + 0.1, 3.0))}
+              className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white flex items-center justify-center font-bold"
+            >
+              +
+            </button>
+          </div>
         </div>
 
-        <div className="absolute bottom-32 left-1/2 -translate-x-1/2 z-20 px-4 py-2 bg-black/50 backdrop-blur-md rounded-full border border-white/10 text-[10px] text-white/50 uppercase tracking-[0.2em]">
-          Mode: <span className="text-primary font-bold">{currentView}</span>
+        <div className="absolute bottom-32 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2">
+          <div className="px-4 py-2 bg-black/50 backdrop-blur-md rounded-full border border-white/10 text-[10px] text-white/50 uppercase tracking-[0.2em]">
+            Mode: <span className="text-primary font-bold">{currentView}</span>
+          </div>
+          <p className="text-[10px] text-white/30 uppercase text-center max-w-[200px]">
+            Raise left hand to shrink, right hand to enlarge
+          </p>
         </div>
       </div>
     </div>

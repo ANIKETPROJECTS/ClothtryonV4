@@ -50,7 +50,7 @@ export default function Home() {
               Fall / Winter 2025
             </motion.span>
             
-            <motion.h1 variants={fadeInUp} className="text-5xl md:text-7xl lg:text-8xl font-display font-bold text-white mb-6 leading-tight">
+            <motion.h1 variants={fadeInUp} className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-display font-bold text-white mb-6 leading-tight">
               Redefining <br/>
               <span className="text-gradient">Digital Luxury</span>
             </motion.h1>

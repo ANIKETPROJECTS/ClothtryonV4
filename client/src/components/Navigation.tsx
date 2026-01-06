@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { ShoppingBag, Search, Menu } from "lucide-react";
+import { ShoppingBag, Search, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -37,7 +37,7 @@ export function Navigation() {
               className="md:hidden text-white/70 hover:text-white"
               onClick={() => setIsOpen(!isOpen)}
             >
-              <Menu className="w-6 h-6" />
+              {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
         </div>
@@ -53,9 +53,9 @@ export function Navigation() {
             className="md:hidden bg-background border-b border-white/5 overflow-hidden"
           >
             <div className="px-4 pt-2 pb-6 space-y-4">
-              <MobileNavLink href="/shop">Shop</MobileNavLink>
-              <MobileNavLink href="/collections">Collections</MobileNavLink>
-              <MobileNavLink href="/about">About</MobileNavLink>
+              <MobileNavLink href="/shop" onClick={() => setIsOpen(false)}>Shop</MobileNavLink>
+              <MobileNavLink href="/collections" onClick={() => setIsOpen(false)}>Collections</MobileNavLink>
+              <MobileNavLink href="/about" onClick={() => setIsOpen(false)}>About</MobileNavLink>
             </div>
           </motion.div>
         )}
@@ -72,9 +72,9 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
   );
 }
 
-function MobileNavLink({ href, children }: { href: string; children: React.ReactNode }) {
+function MobileNavLink({ href, children, onClick }: { href: string; children: React.ReactNode; onClick?: () => void }) {
   return (
-    <Link href={href} className="block text-lg font-medium text-white/70 hover:text-primary transition-colors">
+    <Link href={href} onClick={onClick} className="block text-lg font-medium text-white/70 hover:text-primary transition-colors">
       {children}
     </Link>
   );

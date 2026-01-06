@@ -75,10 +75,10 @@ export default function ProductDetail() {
       </AnimatePresence>
 
       <div className="pt-24 pb-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 xl:gap-24">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 xl:gap-24">
           
           {/* Image Gallery */}
-          <div className="space-y-6">
+          <div className="space-y-4 md:space-y-6">
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -95,14 +95,14 @@ export default function ProductDetail() {
               {/* Floating VTO Trigger */}
               <button
                 onClick={() => setIsVTOOpen(true)}
-                className="absolute bottom-6 right-6 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-black px-6 py-3 rounded-full flex items-center gap-2 transition-all group-hover:scale-105 shadow-xl"
+                className="absolute bottom-4 right-4 md:bottom-6 md:right-6 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-black px-4 py-2 md:px-6 md:py-3 rounded-full flex items-center gap-2 transition-all group-hover:scale-105 shadow-xl"
               >
-                <Scan className="w-5 h-5 text-black" />
-                <span className="font-bold">Virtual Try-On</span>
+                <Scan className="w-4 h-4 md:w-5 md:h-5 text-black" />
+                <span className="font-bold text-xs md:text-base">Virtual Try-On</span>
               </button>
             </motion.div>
 
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-4 gap-2 md:gap-4">
               {images.map((img, idx) => (
                 <button
                   key={idx}
@@ -112,17 +112,17 @@ export default function ProductDetail() {
                   }`}
                 >
                   <img src={img} alt={getViewLabel(idx)} className="w-full h-full object-cover" />
-                  <span className="text-[10px] uppercase mt-1 text-neutral-500 font-bold">{getViewLabel(idx)}</span>
+                  <span className="text-[8px] md:text-[10px] uppercase mt-1 text-neutral-500 font-bold">{getViewLabel(idx)}</span>
                 </button>
               ))}
             </div>
           </div>
 
           {/* Product Info */}
-          <div className="flex flex-col justify-center">
-            <div className="mb-8">
+          <div className="flex flex-col justify-center mt-8 lg:mt-0">
+            <div className="mb-6 md:mb-8">
               <div className="flex justify-between items-start mb-4">
-                <span className="text-primary font-bold tracking-widest text-sm uppercase">New Collection</span>
+                <span className="text-primary font-bold tracking-widest text-xs md:text-sm uppercase">New Collection</span>
                 <div className="flex gap-4">
                   <button className="text-neutral-400 hover:text-white transition-colors">
                     <Share2 className="w-5 h-5" />
@@ -133,12 +133,12 @@ export default function ProductDetail() {
                 </div>
               </div>
               
-              <h1 className="text-4xl md:text-5xl font-display font-bold text-white mb-4">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-display font-bold text-white mb-4">
                 {product.name}
               </h1>
               
-              <div className="flex items-center gap-4 mb-6">
-                <span className="text-3xl font-light text-white">
+              <div className="flex flex-wrap items-center gap-4 mb-6">
+                <span className="text-2xl md:text-3xl font-light text-white">
                   {formatPrice(product.price)}
                 </span>
                 <div className="flex items-center text-yellow-500 text-sm">
@@ -151,22 +151,22 @@ export default function ProductDetail() {
                 </div>
               </div>
 
-              <p className="text-neutral-400 leading-relaxed mb-8 text-lg">
+              <p className="text-neutral-400 leading-relaxed mb-6 md:mb-8 text-base md:text-lg">
                 {product.description}
               </p>
 
               {/* Size Selector */}
-              <div className="mb-8">
+              <div className="mb-6 md:mb-8">
                 <div className="flex justify-between mb-4">
                   <span className="text-sm font-bold text-white uppercase">Select Size</span>
                   <button className="text-sm text-neutral-400 underline hover:text-white">Size Guide</button>
                 </div>
-                <div className="flex gap-3">
+                <div className="flex flex-wrap gap-2 md:gap-3">
                   {(product.sizes as string[])?.map((size) => (
                     <button
                       key={size}
                       onClick={() => setSelectedSize(size)}
-                      className={`w-12 h-12 rounded-lg border flex items-center justify-center font-bold transition-all ${
+                      className={`w-10 h-10 md:w-12 md:h-12 rounded-lg border flex items-center justify-center font-bold transition-all ${
                         selectedSize === size
                           ? "bg-white text-black border-white"
                           : "border-neutral-700 text-neutral-400 hover:border-neutral-500"
@@ -179,15 +179,15 @@ export default function ProductDetail() {
               </div>
 
               {/* Actions */}
-              <div className="flex gap-4 mb-10">
-                <button className="flex-1 bg-primary hover:bg-primary/90 text-black font-bold py-4 rounded-full flex items-center justify-center gap-2 transition-colors">
+              <div className="flex gap-4 mb-8 md:mb-10">
+                <button className="flex-1 bg-primary hover:bg-primary/90 text-black font-bold py-3 md:py-4 rounded-full flex items-center justify-center gap-2 transition-colors">
                   <ShoppingBag className="w-5 h-5" />
                   Add to Cart
                 </button>
               </div>
 
               {/* Features List */}
-              <div className="border-t border-white/10 pt-8">
+              <div className="border-t border-white/10 pt-6 md:pt-8">
                 <h3 className="text-sm font-bold text-white uppercase mb-4">Highlights</h3>
                 <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {(product.features as string[])?.map((feature, i) => (
