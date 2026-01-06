@@ -80,7 +80,6 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
     if (
       webcamRef.current?.video?.readyState === 4 &&
       model &&
-      handModel &&
       canvasRef.current
     ) {
       const video = webcamRef.current.video;
@@ -94,23 +93,31 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
 
       const start = performance.now();
       
-      // Run detections sequentially to avoid potential WebGL context issues in parallel
+      // Get Pose
       const poses = await model.estimatePoses(video, { flipHorizontal: false });
-      let hands: Hand[] = [];
+      
+      // Get Hand Landmarks from Python Service
+      let handsData: any[] = [];
       try {
-        if (handModel) {
-          hands = await handModel.estimateHands(video, { flipHorizontal: false });
+        const screenshot = webcamRef.current.getScreenshot();
+        if (screenshot) {
+          const response = await fetch('http://localhost:5001/detect', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image: screenshot })
+          });
+          const result = await response.json();
+          handsData = result.hands || [];
+          if (handsData.length > 0) {
+            console.log(`[Python Hand Detection] Detected ${handsData.length} hand(s)`);
+          }
         }
       } catch (err) {
-        console.warn("Hand detection skipped this frame:", err);
+        // Silently fail hand detection if service is not ready
       }
       
       const end = performance.now();
       const fps = 1000 / (end - start);
-
-      if (hands && hands.length > 0) {
-        console.log(`[Hand Detection] Detected ${hands.length} hand(s)`);
-      }
 
       if (poses && poses.length > 0) {
         const pose = poses[0];
@@ -118,14 +125,26 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
           fps: Math.round(fps), 
           confidence: Math.round((pose.score || 0) * 100) 
         });
-        drawCanvas(pose, hands || [], videoWidth, videoHeight, canvasRef.current);
+        
+        // Convert Python hand data format to what drawCanvas expects
+        const formattedHands: Hand[] = handsData.map(hand => ({
+          keypoints: hand.map((lm: any) => ({
+            x: lm.x * videoWidth,
+            y: lm.y * videoHeight,
+            score: 1.0 
+          })),
+          score: 1.0,
+          handedness: 'Right'
+        }));
+        
+        drawCanvas(pose, formattedHands, videoWidth, videoHeight, canvasRef.current);
       } else {
         const ctx = canvasRef.current.getContext("2d");
         if (ctx) ctx.clearRect(0, 0, videoWidth, videoHeight);
         setMetrics(prev => ({ ...prev, fps: Math.round(fps), confidence: 0 }));
       }
     }
-  }, [model, handModel, currentView]);
+  }, [model, currentView]);
 
   useEffect(() => {
     let animationFrameId: number;
