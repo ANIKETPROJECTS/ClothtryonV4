@@ -149,13 +149,15 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
         
         if (hasNose) {
           const noseOffset = (nose.x - shoulderCenterX) / (shoulderWidth / 2);
-          if (noseOffset > 0.6) detectedView = 'right';
-          else if (noseOffset < -0.6) detectedView = 'left';
+          // Swapped 'left' and 'right' logic to fix the mirrored image issue
+          if (noseOffset > 0.6) detectedView = 'left';
+          else if (noseOffset < -0.6) detectedView = 'right';
           else detectedView = 'front';
         } else if (facePointsCount >= 1) {
           detectedView = 'front';
         } else if (earPointsCount === 1) {
-          detectedView = leftEar?.score! > rightEar?.score! ? 'left' : 'right';
+          // Swapped 'left' and 'right' logic here too
+          detectedView = leftEar?.score! > rightEar?.score! ? 'right' : 'left';
         } else {
           detectedView = 'front';
         }
