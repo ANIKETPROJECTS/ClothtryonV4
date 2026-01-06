@@ -173,12 +173,15 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
         if (leftWristRaised && rightWristRaised) {
           if (!activeGestures.current.bothWrists) {
             setVerticalOffset(prev => {
-              const next = Math.max(prev - 0.01, -0.5);
+              const next = Math.max(prev - 0.05, -0.5);
               console.log(`Gesture Triggered: Both wrists raised - Shifting T-shirt up. New Offset: ${next.toFixed(2)}`);
               return next;
             });
             activeGestures.current.bothWrists = true;
           }
+          // Prevent size scaling when both wrists are raised
+          activeGestures.current.rightWrist = true;
+          activeGestures.current.leftWrist = true;
         } else if (leftWrist && rightWrist && leftWrist.score! > 0.5 && rightWrist.score! > 0.5) {
           // Check for crossed arms (wrists on opposite sides of the center)
           const shoulderCenterX = (leftShoulder.x + rightShoulder.x) / 2;
@@ -187,12 +190,15 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
           if (isCrossed) {
             if (!activeGestures.current.bothWrists) {
               setVerticalOffset(prev => {
-                const next = Math.min(prev + 0.01, 0.5);
+                const next = Math.min(prev + 0.05, 0.5);
                 console.log(`Gesture Triggered: Crossed arms - Shifting T-shirt down. New Offset: ${next.toFixed(2)}`);
                 return next;
               });
               activeGestures.current.bothWrists = true;
             }
+            // Prevent size scaling when arms are crossed
+            activeGestures.current.rightWrist = true;
+            activeGestures.current.leftWrist = true;
           } else if (!leftWristRaised && !rightWristRaised) {
             activeGestures.current.bothWrists = false;
           }
