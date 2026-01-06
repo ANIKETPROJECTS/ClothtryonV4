@@ -173,13 +173,14 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
         if (leftWristRaised && rightWristRaised) {
           if (!activeGestures.current.bothWrists) {
             setVerticalOffset(prev => {
-              const next = Math.max(prev - 0.05, -0.5);
+              const next = Math.max(prev - 0.02, -0.5);
               console.log(`Gesture Triggered: Both wrists raised - Shifting T-shirt up. New Offset: ${next.toFixed(2)}`);
               return next;
             });
             activeGestures.current.bothWrists = true;
           }
-        } else {
+        } else if (!leftWristRaised && !rightWristRaised) {
+          // Both must be down to reset the gesture
           activeGestures.current.bothWrists = false;
         }
 
