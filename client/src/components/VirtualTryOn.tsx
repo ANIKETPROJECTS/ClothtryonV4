@@ -198,10 +198,11 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
           // Position adjustment: Since we rotated 180 deg, we now need to adjust
           // the Y offset in the opposite direction. 
           // The collar area should stay at the shoulder line.
+          // Changed -0.85 to -0.05 to shift the image DOWN into the torso rectangle
           ctx.drawImage(
             shirtImg, 
             -shirtImg.width / 2, 
-            -shirtImg.height * 0.85 + TSHIRT_CONFIG.calibration.verticalOffset 
+            -shirtImg.height * 0.05 + TSHIRT_CONFIG.calibration.verticalOffset 
           );
 
           ctx.restore();
