@@ -8,6 +8,7 @@ import { useProducts } from "@/hooks/use-products";
 import type { Product } from "@shared/schema";
 import luxuryFabricImg from "@assets/generated_images/luxury_fabric_texture_background_dark.png";
 import sustainableStudioImg from "@assets/generated_images/sustainable_fashion_studio_background_black.png";
+import craftDetailImg from "@assets/generated_images/premium_fabric_craftsmanship_detail_dark_luxury.png";
 
 // Helper for animations
 const fadeInUp = {
@@ -103,20 +104,30 @@ export default function Home() {
           <img src={luxuryFabricImg} alt="Craftsmanship" className="w-full h-full object-cover" />
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
-          <div className="max-w-2xl">
-            <h2 className="text-4xl md:text-5xl font-display font-bold text-white mb-8">Uncompromising <span className="text-primary">Craftsmanship</span></h2>
-            <p className="text-lg text-neutral-300 mb-8 leading-relaxed">
-              Every ONYU garment is a result of meticulous material studies. From the weight of our jersey to the reinforcement of every seam, we prioritize longevity over trends.
-            </p>
-            <div className="grid grid-cols-2 gap-8">
-              <div>
-                <span className="text-3xl font-display font-bold text-white block mb-2">240GSM</span>
-                <p className="text-sm text-neutral-500 uppercase tracking-widest">Heavyweight Cotton</p>
+          <div className="grid md:grid-cols-2 gap-16 items-center">
+            <div className="max-w-2xl">
+              <h2 className="text-4xl md:text-5xl font-display font-bold text-white mb-8">Uncompromising <span className="text-primary">Craftsmanship</span></h2>
+              <p className="text-lg text-neutral-300 mb-8 leading-relaxed">
+                Every ONYU garment is a result of meticulous material studies. From the weight of our jersey to the reinforcement of every seam, we prioritize longevity over trends.
+              </p>
+              <div className="grid grid-cols-2 gap-8">
+                <div>
+                  <span className="text-3xl font-display font-bold text-white block mb-2">240GSM</span>
+                  <p className="text-sm text-neutral-500 uppercase tracking-widest">Heavyweight Cotton</p>
+                </div>
+                <div>
+                  <span className="text-3xl font-display font-bold text-white block mb-2">100%</span>
+                  <p className="text-sm text-neutral-500 uppercase tracking-widest">Organic Sourcing</p>
+                </div>
               </div>
-              <div>
-                <span className="text-3xl font-display font-bold text-white block mb-2">100%</span>
-                <p className="text-sm text-neutral-500 uppercase tracking-widest">Organic Sourcing</p>
-              </div>
+            </div>
+            <div className="relative aspect-[4/3] rounded-2xl overflow-hidden border border-white/5 shadow-2xl">
+              <img 
+                src={craftDetailImg} 
+                alt="Craftsmanship Detail" 
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
             </div>
           </div>
         </div>
