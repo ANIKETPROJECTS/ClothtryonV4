@@ -431,7 +431,7 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
         <canvas ref={canvasRef} className="absolute inset-0 w-full h-full object-cover pointer-events-none transform -scale-x-100" />
 
         <div className="absolute bottom-8 left-0 right-0 flex justify-center items-center gap-6 z-20 px-6">
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 md:hidden">
             <button 
               onClick={() => setSizeScale(prev => Math.min(prev + 0.1, 3.0))}
               className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white flex items-center justify-center font-bold"
@@ -452,7 +452,7 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
             <Camera className="w-8 h-8" />
           </button>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 md:hidden">
             <button 
               onClick={() => setVerticalOffset(prev => Math.max(prev - 0.05, -0.5))}
               className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white flex items-center justify-center"
