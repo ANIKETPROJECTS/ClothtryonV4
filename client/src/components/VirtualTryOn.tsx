@@ -173,14 +173,29 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
         if (leftWristRaised && rightWristRaised) {
           if (!activeGestures.current.bothWrists) {
             setVerticalOffset(prev => {
-              const next = Math.max(prev - 0.02, -0.5);
+              const next = Math.max(prev - 0.01, -0.5);
               console.log(`Gesture Triggered: Both wrists raised - Shifting T-shirt up. New Offset: ${next.toFixed(2)}`);
               return next;
             });
             activeGestures.current.bothWrists = true;
           }
-        } else if (!leftWristRaised && !rightWristRaised) {
-          // Both must be down to reset the gesture
+        } else if (leftWrist && rightWrist && leftWrist.score! > 0.5 && rightWrist.score! > 0.5) {
+          const shoulderWidth = Math.abs(rightShoulder.x - leftShoulder.x);
+          const wristDist = Math.abs(rightWrist.x - leftWrist.x);
+          
+          if (wristDist > shoulderWidth * 2.5) {
+            if (!activeGestures.current.bothWrists) {
+              setVerticalOffset(prev => {
+                const next = Math.min(prev + 0.01, 0.5);
+                console.log(`Gesture Triggered: Wrists apart - Shifting T-shirt down. New Offset: ${next.toFixed(2)}`);
+                return next;
+              });
+              activeGestures.current.bothWrists = true;
+            }
+          } else if (!leftWristRaised && !rightWristRaised) {
+            activeGestures.current.bothWrists = false;
+          }
+        } else {
           activeGestures.current.bothWrists = false;
         }
 
