@@ -167,49 +167,56 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
         setCurrentView(detectedView);
       }
 
-      // Draw tracking lines for body only
-      drawTrackingOverlay(ctx, keypoints);
+        // Draw tracking lines for body only - changed to Gold for contrast
+        drawTrackingOverlay(ctx, keypoints);
 
-      const shirtImg = shirtImages.current[currentView];
-      if (shirtImg) {
-        const shoulderCenterX = (leftShoulder.x + rightShoulder.x) / 2;
-        const shoulderCenterY = (leftShoulder.y + rightShoulder.y) / 2;
-        const shoulderWidth = Math.sqrt(
-          Math.pow(rightShoulder.x - leftShoulder.x, 2) +
-          Math.pow(rightShoulder.y - leftShoulder.y, 2)
-        );
-        const angle = Math.atan2(
-          rightShoulder.y - leftShoulder.y,
-          rightShoulder.x - leftShoulder.x
-        );
+        const shirtImg = shirtImages.current[currentView];
+        if (shirtImg) {
+          const shoulderCenterX = (leftShoulder.x + rightShoulder.x) / 2;
+          const shoulderCenterY = (leftShoulder.y + rightShoulder.y) / 2;
+          const shoulderWidth = Math.sqrt(
+            Math.pow(rightShoulder.x - leftShoulder.x, 2) +
+            Math.pow(rightShoulder.y - leftShoulder.y, 2)
+          );
+          // Angle of shoulders
+          const angle = Math.atan2(
+            rightShoulder.y - leftShoulder.y,
+            rightShoulder.x - leftShoulder.x
+          );
 
-        ctx.save();
-        ctx.translate(shoulderCenterX, shoulderCenterY);
-        ctx.rotate(angle);
-        
-        const scale = (shoulderWidth * TSHIRT_CONFIG.calibration.scaleFactor) / shirtImg.width;
-        ctx.scale(scale, scale);
+          ctx.save();
+          // Anchor to midpoint between shoulders
+          ctx.translate(shoulderCenterX, shoulderCenterY);
+          
+          // Rotation: Add Math.PI (180 degrees) if the image is inverted
+          // We also need to flip the angle because of the CSS mirroring
+          ctx.rotate(angle + Math.PI);
+          
+          const scale = (shoulderWidth * TSHIRT_CONFIG.calibration.scaleFactor) / shirtImg.width;
+          ctx.scale(scale, scale);
 
-        // Position adjustment: T-shirt should sit on the body, not above the head.
-        // We use a vertical offset relative to the shoulder line.
-        ctx.drawImage(
-          shirtImg, 
-          -shirtImg.width / 2, 
-          -shirtImg.height * 0.05 + TSHIRT_CONFIG.calibration.verticalOffset 
-        );
+          // Position adjustment: Since we rotated 180 deg, we now need to adjust
+          // the Y offset in the opposite direction. 
+          // The collar area should stay at the shoulder line.
+          ctx.drawImage(
+            shirtImg, 
+            -shirtImg.width / 2, 
+            -shirtImg.height * 0.85 + TSHIRT_CONFIG.calibration.verticalOffset 
+          );
 
-        ctx.restore();
+          ctx.restore();
+        }
       }
-    }
-  };
+    };
 
-  const drawTrackingOverlay = (ctx: CanvasRenderingContext2D, keypoints: Keypoint[]) => {
-    const points = ["left_shoulder", "right_shoulder", "left_hip", "right_hip", "left_elbow", "right_elbow", "left_wrist", "right_wrist"];
-    const found = points.map(name => keypoints.find(k => k.name === name));
-    
-    ctx.strokeStyle = "#00FF00";
-    ctx.lineWidth = 3;
-    ctx.lineCap = "round";
+    const drawTrackingOverlay = (ctx: CanvasRenderingContext2D, keypoints: Keypoint[]) => {
+      const points = ["left_shoulder", "right_shoulder", "left_hip", "right_hip", "left_elbow", "right_elbow", "left_wrist", "right_wrist"];
+      const found = points.map(name => keypoints.find(k => k.name === name));
+      
+      // Changed to Gold (#D4AF37) for better contrast and ONYU branding
+      ctx.strokeStyle = "#D4AF37";
+      ctx.lineWidth = 3;
+      ctx.lineCap = "round";
 
     const [ls, rs, lh, rh, le, re, lw, rw] = found;
 
