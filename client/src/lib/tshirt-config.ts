@@ -2,15 +2,20 @@
 // In a real app, these would come from the database or API
 // Using high-quality placeholders for the luxury aesthetic
 
+import frontImg from "@assets/Front2_1767677434383.PNG";
+import backImg from "@assets/Back2_1767677434383.PNG";
+import leftImg from "@assets/left2_1767677434384.PNG";
+import rightImg from "@assets/right2_1767677434384.PNG";
+
 export const TSHIRT_CONFIG = {
   id: "luxury-tee-001",
   name: "Essential Luxury Tee",
   price: 12000, // $120.00
   images: {
-    front: "https://placehold.co/600x800/0f0f0f/D4AF37/png?text=Front+View",
-    back: "https://placehold.co/600x800/0f0f0f/D4AF37/png?text=Back+View",
-    left: "https://placehold.co/600x800/0f0f0f/D4AF37/png?text=Left+Side",
-    right: "https://placehold.co/600x800/0f0f0f/D4AF37/png?text=Right+Side",
+    front: frontImg,
+    back: backImg,
+    left: leftImg,
+    right: rightImg,
   },
   calibration: {
     scaleFactor: 1.8, // Adjust based on how the image should fit relative to shoulder width

@@ -237,7 +237,7 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
       // Select Image
       const shirtImg = shirtImages.current[currentView];
 
-      if (shirtImg && false) {
+      if (shirtImg) {
         ctx.save();
         
         // Move to center of torso (approximate anchor point)
@@ -261,9 +261,6 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
         );
 
         ctx.restore();
-
-        // Debug: Draw skeleton overlay
-        // drawSkeleton(ctx, keypoints);
       }
     }
   };
