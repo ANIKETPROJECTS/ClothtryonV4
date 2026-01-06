@@ -135,7 +135,9 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
     const minConfidence = 0.35;
     if (
       leftShoulder && leftShoulder.score! > minConfidence &&
-      rightShoulder && rightShoulder.score! > minConfidence
+      rightShoulder && rightShoulder.score! > minConfidence &&
+      leftHip && leftHip.score! > minConfidence &&
+      rightHip && rightHip.score! > minConfidence
     ) {
       // Orientation Detection logic
       const hasNose = nose && nose.score! > 0.3;
@@ -211,6 +213,35 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
         );
 
         ctx.restore();
+
+        // Render arms ahead of the image if in side view
+        if (currentView === 'left' || currentView === 'right') {
+          const drawArmSegment = (p1?: Keypoint, p2?: Keypoint) => {
+            if (p1 && p1.score! > minConfidence && p2 && p2.score! > minConfidence) {
+              // We only want elbow to wrist/ahead
+              // But to look natural we draw the whole segment
+              ctx.beginPath();
+              ctx.strokeStyle = "#00FF00";
+              ctx.lineWidth = 4;
+              ctx.moveTo(p1.x, p1.y);
+              ctx.lineTo(p2.x, p2.y);
+              ctx.stroke();
+            }
+          };
+
+          const leftElbow = keypoints.find(k => k.name === "left_elbow");
+          const leftWrist = keypoints.find(k => k.name === "left_wrist");
+          const rightElbow = keypoints.find(k => k.name === "right_elbow");
+          const rightWrist = keypoints.find(k => k.name === "right_wrist");
+
+          if (currentView === 'left') {
+            // In left view (facing left), the right arm is usually more visible/ahead
+            drawArmSegment(rightElbow, rightWrist);
+          } else {
+            // In right view, the left arm is ahead
+            drawArmSegment(leftElbow, leftWrist);
+          }
+        }
       }
     }
   };
@@ -227,7 +258,7 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
     const [ls, rs, lh, rh, le, re, lw, rw] = found;
 
     const drawLine = (p1?: Keypoint, p2?: Keypoint) => {
-      if (p1?.score! > 0.3 && p2?.score! > 0.3) {
+      if (p1 && p1.score! > 0.3 && p2 && p2.score! > 0.3) {
         ctx.beginPath();
         ctx.moveTo(p1.x, p1.y);
         ctx.lineTo(p2.x, p2.y);
