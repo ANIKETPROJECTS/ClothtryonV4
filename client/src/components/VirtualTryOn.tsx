@@ -187,8 +187,8 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
         const stableWidth = Math.max(shoulderWidth, minShoulderWidth);
 
         // Use a uniform scale to prevent stretching and keep the T-shirt "normal"
-        // We'll base it on the width and apply the same to height
-        const scale = (stableWidth * 2.1) / shirtImg.width;
+        // Reducing scale factor to make the T-shirt smaller as requested
+        const scale = (stableWidth * 1.5) / shirtImg.width;
 
         // Set angle to 0 for a fixed, straight T-shirt
         const angle = 0;
@@ -201,11 +201,11 @@ export function VirtualTryOn({ onClose }: VirtualTryOnProps) {
         ctx.scale(scale, scale);
 
         // Position adjustment: Shift T-shirt upwards
-        // -0.25 moves it up significantly from the shoulder line anchor
+        // Adjusting Y-offset to align with smaller scale
         ctx.drawImage(
           shirtImg, 
           -shirtImg.width / 2, 
-          -shirtImg.height * 0.25
+          -shirtImg.height * 0.15
         );
 
         ctx.restore();
